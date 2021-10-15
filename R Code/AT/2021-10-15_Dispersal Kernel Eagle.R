@@ -17,11 +17,13 @@ library(ggpubr)
 # Location where the raw acoustic telemetry and Bruv data are stored
 datafolder <- "/Users/uqrdwye2/Dropbox/shark_mpa_model_v400/SA/DEW Marine Parks project/"
 
-#Harlequin fish
-sp_det <- paste0(datafolder,"Harlequin fish/VUE_Export for Harlequin fish_All data.csv")
-sp_receivermet <- paste0(datafolder,"Harlequin fish/Harlequin fish station information.csv")
-sp_tagmet <- paste0(datafolder,"Harlequin fish/IMOS_Harlequin tag deployment info.csv")
-sp_meas <- paste0(datafolder,"Harlequin fish/IMOS_animal_measurements.csv")
+#Eagle Rays
+sp_det1 <- paste0(datafolder,"Southern eagle ray/Coffin Bay VUE export 2019.csv")
+sp_det2 <- paste0(datafolder,"Southern eagle ray/Coffin Bay VUE export 2021.csv")
+sp_det3 <- paste0(datafolder,"Southern eagle ray/Fleurieu Eagle Ray Detections.csv")
+sp_receivermet <- paste0(datafolder,"Southern eagle ray/Coffin Bay_stations.csv")
+sp_tagmet <- paste0(datafolder,"Southern eagle ray/IMOS_transmitter_deployment_metadata.csv")
+sp_meas <- paste0(datafolder,"Southern eagle ray/IMOS_animal_measurements.csv")
 
 ## specify files to QC - use supplied example .csv data
 sp_files <- list(det = sp_det,

@@ -17,14 +17,18 @@ library(ggpubr)
 # Location where the raw acoustic telemetry and Bruv data are stored
 datafolder <- "/Users/uqrdwye2/Dropbox/shark_mpa_model_v400/SA/DEW Marine Parks project/"
 
-#Harlequin fish
-sp_det <- paste0(datafolder,"Harlequin fish/VUE_Export for Harlequin fish_All data.csv")
-sp_receivermet <- paste0(datafolder,"Harlequin fish/Harlequin fish station information.csv")
-sp_tagmet <- paste0(datafolder,"Harlequin fish/IMOS_Harlequin tag deployment info.csv")
-sp_meas <- paste0(datafolder,"Harlequin fish/IMOS_animal_measurements.csv")
+#Eagle Rays
+sp_det1 <- paste0(datafolder,"Southern eagle ray/Coffin Bay VUE export 2019.csv")
+sp_det2 <- paste0(datafolder,"Southern eagle ray/Coffin Bay VUE export 2021.csv")
+sp_det3 <- paste0(datafolder,"Southern eagle ray/Fleurieu Eagle Ray Detections.csv")
+sp_receivermet <- paste0(datafolder,"Southern eagle ray/Coffin Bay_stations.csv")
+sp_tagmet <- paste0(datafolder,"Southern eagle ray/IMOS_transmitter_deployment_metadata.csv")
+sp_meas <- paste0(datafolder,"Southern eagle ray/IMOS_animal_measurements.csv")
 
 ## specify files to QC - use supplied example .csv data
-sp_files <- list(det = sp_det,
+sp_files <- list(det1 = sp_det1,
+                 det2 = sp_det2,
+                 det3 = sp_det3,
                  rmeta = sp_receivermet,
                  tmeta = sp_tagmet,
                  meas = sp_meas)
@@ -37,26 +41,46 @@ sp_files <- list(det = sp_det,
 #qc.out <- readRDS("Data/snapper_detQC.RDS") # Load detection data
 #d.qc <- grabQC(qc.out, what = "dQC") # Grab QC detection-only data
 
-sp_det_dat <- read.csv(sp_files$det)
-sp_receivermet_dat <- read.csv(sp_files$rmeta)
+# Extract only the variables we are interested renaming them to remora format
+# tag data
+
+# Coffin Bay tag data
+sp_det_dat1 <- read.csv(sp_files$det1)
+sp_det_dat2 <- read.csv(sp_files$det2)
+sp_det_dat_Cof <- rbind(sp_det_dat1,sp_det_dat2)
 sp_tagmet_dat <-  read.csv(sp_files$tmeta)
 
-# Extract only the variables we are interested renaming them to remora format
-sp_det_dat <- sp_det_dat %>% 
-  mutate(species_common_name="Harlequin",
-         species_scientific_name="Othos dentex") %>%
+sp_det_dat_Cof <- sp_det_dat_Cof %>% 
+  mutate(species_common_name="Southern eagle ray",
+         species_scientific_name="Myliobatis tenuicaudatus ") %>%
   rename(transmitter_id=Transmitter,
          detection_datetime=Date.and.Time..UTC.,
          station_name=Station.Name) %>%
   select(species_common_name,species_scientific_name,transmitter_id,detection_datetime,station_name)
 
-# Extract only the variables we are interested renaming them to remora format
-sp_receivermet_dat <- sp_receivermet_dat %>% 
+# Coffin Bay receiver data
+sp_receivermet_dat_Cof <- read.csv(sp_files$rmeta)
+sp_receivermet_dat_Cof <- sp_receivermet_dat_Cof %>% 
   rename(receiver_deployment_latitude=last_deployed_latitude,
          receiver_deployment_longitude=last_deployed_longitude) %>%
   select(installation_name,receiver_deployment_latitude,receiver_deployment_longitude,station_name)
+d.dplyr_Cof <- left_join(sp_det_dat_Cof,sp_receivermet_dat_Cof)
 
-d.dplyr <- left_join(sp_det_dat,sp_receivermet_dat)
+# Horseshoe tag data
+sp_det_dat_Hor0 <- read.csv(sp_files$det3)
+sp_det_dat_Hor <- sp_det_dat_Hor0 %>% 
+  mutate(installation_name="Horseshoe",
+         species_common_name="Southern eagle ray",
+         species_scientific_name="Myliobatis tenuicaudatus ") %>%
+  rename(transmitter_id=Transmitter,
+         detection_datetime=Date.and.Time..UTC.,
+         station_name=Station.Name,
+                receiver_deployment_latitude=Latitude,
+                receiver_deployment_longitude=Longitude) %>%
+  select(species_common_name,species_scientific_name,transmitter_id,
+         detection_datetime,station_name,
+         receiver_deployment_longitude,receiver_deployment_latitude)
+
 
 # Add time catagories to location summary
 location_summary <-  d.dplyr %>%
@@ -80,7 +104,7 @@ location_summary_day <-
   unite("z", species_common_name, transmitter_id, Day, remove = FALSE) %>%
   distinct(z,receiver_deployment_longitude,receiver_deployment_latitude) %>%
   arrange(z)
-  
+
 # Function to calculate great circle distances
 fGCdist <- function(x) {
   tempsf <- SpatialPoints(location_summary_day[x, c("receiver_deployment_longitude","receiver_deployment_latitude")], 
@@ -144,8 +168,8 @@ dispersal_summary_month <- location_summary_month %>%
 
 # Save the file as an RDS object
 Dispersal_Timescales_Harlequin <- list(Daily=dispersal_summary_day,
-                                     Weekly=dispersal_summary_week,
-                                     Monthly=dispersal_summary_month)
+                                       Weekly=dispersal_summary_week,
+                                       Monthly=dispersal_summary_month)
 saveRDS(Dispersal_Timescales_Harlequin, file = "Data/Dispersal_Timescales_Harlequin.RDS") # Save to github
 
 ##############################################
