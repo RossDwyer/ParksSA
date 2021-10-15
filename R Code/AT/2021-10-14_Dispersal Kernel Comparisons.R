@@ -1,14 +1,18 @@
 ## Dispersal Kernel comparisons
 ## Code will take varoius detection datasets for each species and combine with the tag release metadata
 
-install_github("RossDwyer/VTrack", configure.args = "--with-proj-lib=/usr/local/lib/")
+#install_github("RossDwyer/VTrack", configure.args = "--with-proj-lib=/usr/local/lib/")
 
 library(tidyverse)
 library(lubridate)
 library(VTrack)
 library(remora)
+library(sf)
+library(sp)
+library(ggpubr)
 #source("R/2018-10-15_displot.R")
 
+# Location where the raw acoustic telemetry and Bruv data are stored
 datafolder <- "/Users/uqrdwye2/Dropbox/shark_mpa_model_v400/SA/DEW Marine Parks project/"
 
 #Snapper
@@ -18,51 +22,118 @@ snap_tagmet <- paste0(datafolder,"Snapper/IMOS_transmitter_deployment_metadata.c
 snap_meas <- paste0(datafolder,"Snapper/IMOS_animal_measurements.csv")
 
 ## specify files to QC - use supplied example .csv data
-snap_files <- list(det = snap_det,
-              rmeta = snap_receivermet,
-              tmeta = snap_tagmet,
-              meas = snap_meas)
-qc.out <- runQC(snap_files)
-
-plotQC(qc.out)
-
-d.qc <- grabQC(qc.out, what = "dQC")
-
-# snap_VT <- VTrack::setupData(
-#   Tag.Detections=snap_det,
-#   Tag.Metadata=snap_tagmet,
-#   Station.Information=snap_tagmet,
-#   source = "IMOS",
-#   tzone = "UTC",
-#   crs = NULL
-# )
-
+sp_files <- list(det = snap_det,
+                 rmeta = snap_receivermet,
+                 tmeta = snap_tagmet,
+                 meas = snap_meas)
+#qc.out <- runQC(sp_files) # Run remora::runQC() to combine fields 
+#saveRDS(qc.out, file = "Data/snapper_detQC.RDS") # Save to github
 
 # Read in the detection dataset
-#pac_disp<-readRDS("data/Pacific/Dispersal Summaries/Pacific_dispersalSummary.RDS")
-#car_disp<-readRDS("data/Pacific/Dispersal Summaries/Caribbean_disperalSummary.RDS")
+qc.out <- readRDS("Data/snapper_detQC.RDS") # Load detection data
+d.qc <- grabQC(qc.out, what = "dQC") # Grab QC detection-only data
 
-library(sf)
-dispersal_summary <-  d.qc %>%
+# Add time catagories to location summary
+location_summary <-  d.qc %>%
+  mutate(species_scientific_name = as.factor(species_scientific_name),
+         species_common_name = as.factor(species_common_name),
+         Day = date(detection_datetime),
+         Week = format(Day, "%Y-%W"),
+         Month = format(Day, "%Y-%m")) %>%
   select(transmitter_id,tagging_project_name,
          species_common_name,species_scientific_name,
          detection_datetime,
          installation_name,station_name,
          receiver_deployment_longitude, 
-         receiver_deployment_latitude) %>%
-  # bind_rows(
-  # pac_disp %>%
-  #   mutate(Release.Date = date(ReleaseDate_QC)), 
-  # car_disp) %>%
-  # filter(Consecutive.Dispersal > 0) %>%
-  #filter(Distance_QC > 0) %>%
-  mutate(species_scientific_name = as.factor(species_scientific_name),
-         species_common_name = as.factor(species_common_name),
-         Day = date(detection_datetime),
-         Week = format(Day, "%Y-%W"),
-         Month = format(Day, "%Y-%m"))
+         receiver_deployment_latitude,
+         Day,Week,Month)
 
 
+### Days ------------
+# Unite columns to get unique detections at receiver stations within a specified time interval
+location_summary_day <- 
+  location_summary %>%
+  unite("z", species_common_name, transmitter_id, Day, remove = FALSE) %>%
+  distinct(z,receiver_deployment_longitude,receiver_deployment_latitude) %>%
+  arrange(z)
+  
+# Function to calculate great circle distances
+fGCdist <- function(x) {
+  tempsf <- SpatialPoints(location_summary_day[x, c("receiver_deployment_longitude","receiver_deployment_latitude")], 
+                          proj4string = CRS("+proj=longlat +ellps=WGS84"))
+  return(max(spDists(tempsf,longlat = TRUE)))
+}
+out2 <- tapply(1:nrow(location_summary_day), location_summary_day$z, fGCdist) # Run the function on out dayly dataset
+
+dispersal_summary_day <- location_summary_day %>%
+  group_by(z) %>%
+  summarize(n_stations=n()) %>%
+  mutate(maxDistkm = round(as.numeric(as.vector(out2)),2)) %>%
+  ungroup() %>%
+  separate(z, c("species_common_name", "transmitter_id", "Day"), sep = "([._:])")
+
+
+### Weeks ------------
+# Unite columns to get unique detections at receiver stations within a specified time interval
+location_summary_week <- 
+  location_summary %>%
+  unite("z", species_common_name, transmitter_id, Week, remove = FALSE) %>%
+  distinct(z,receiver_deployment_longitude,receiver_deployment_latitude) %>%
+  arrange(z)
+
+# Function to calculate great circle distances
+fGCdist <- function(x) {
+  tempsf <- SpatialPoints(location_summary_week[x, c("receiver_deployment_longitude","receiver_deployment_latitude")], 
+                          proj4string = CRS("+proj=longlat +ellps=WGS84"))
+  return(max(spDists(tempsf,longlat = TRUE)))
+}
+out2 <- tapply(1:nrow(location_summary_week), location_summary_week$z, fGCdist) # Run the function on out weekly dataset
+
+dispersal_summary_week <- location_summary_week %>%
+  group_by(z) %>%
+  summarize(n_stations=n()) %>%
+  mutate(maxDistkm = round(as.numeric(as.vector(out2)),2)) %>%
+  ungroup() %>%
+  separate(z, c("species_common_name", "transmitter_id", "Week"), sep = "([._:])")
+
+
+### Months ------------
+# Unite columns to get unique detections at receiver stations within a specified time interval
+location_summary_month <- 
+  location_summary %>%
+  unite("z", species_common_name, transmitter_id, Month, remove = FALSE) %>%
+  distinct(z,receiver_deployment_longitude,receiver_deployment_latitude) %>%
+  arrange(z)
+
+# Function to calculate great circle distances
+fGCdist <- function(x) {
+  tempsf <- SpatialPoints(location_summary_month[x, c("receiver_deployment_longitude","receiver_deployment_latitude")], 
+                          proj4string = CRS("+proj=longlat +ellps=WGS84"))
+  return(max(spDists(tempsf,longlat = TRUE)))
+}
+out2 <- tapply(1:nrow(location_summary_month), location_summary_month$z, fGCdist) # Run the function on out monthly dataset
+
+dispersal_summary_month <- location_summary_month %>%
+  group_by(z) %>%
+  summarize(n_stations=n()) %>%
+  mutate(maxDistkm = round(as.numeric(as.vector(out2)),2)) %>%
+  ungroup() %>%
+  separate(z, c("species_common_name", "transmitter_id", "Month"), sep = "([._:])")
+
+
+Dispersal_Timescales_Snapper <- list(dispersal_summary_day,dispersal_summary_week,dispersal_summary_month)
+saveRDS(dispersal_snapper_list, file = "Data/Dispersal_Timescales_Snapper.RDS") # Save to github
+
+##############################################
+
+
+# Compute a histogram of distance per month
+disp.hist <- dispersal_summary_month %>%
+  ggplot(aes(maxDistkm)) + geom_histogram() +theme_bw()
+# Compute a histogram of num receiver stations
+stat.hist <- dispersal_summary_month %>%
+  ggplot(aes(n_stations)) + geom_histogram() +theme_bw()
+ggarrange(disp.hist,stat.hist)
 
 
 lonlat <- "+proj=longlat +datum=WGS84 +no_defs"
