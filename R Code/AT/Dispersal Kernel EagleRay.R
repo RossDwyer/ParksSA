@@ -52,11 +52,13 @@ sp_tagmet_dat <-  read.csv(sp_files$tmeta)
 
 sp_det_dat_Cof <- sp_det_dat_Cof %>% 
   mutate(species_common_name="Southern eagle ray",
-         species_scientific_name="Myliobatis tenuicaudatus ") %>%
+         species_scientific_name="Myliobatis tenuicaudatus",
+         detection_datetime=as.POSIXct(detection_datetime,tz="UTC")) %>%
   rename(transmitter_id=Transmitter,
          detection_datetime=Date.and.Time..UTC.,
          station_name=Station.Name) %>%
-  select(species_common_name,species_scientific_name,transmitter_id,detection_datetime,station_name)
+  select(species_common_name,species_scientific_name,transmitter_id,
+         detection_datetime,station_name)
 
 # Coffin Bay receiver data
 sp_receivermet_dat_Cof <- read.csv(sp_files$rmeta)
@@ -67,26 +69,27 @@ sp_receivermet_dat_Cof <- sp_receivermet_dat_Cof %>%
 d.dplyr_Cof <- left_join(sp_det_dat_Cof,sp_receivermet_dat_Cof)
 
 # Horseshoe tag data
-sp_det_dat_Hor0 <- read.csv(sp_files$det3)
-sp_det_dat_Hor <- sp_det_dat_Hor0 %>% 
+sp_det_dat_Hor <- read.csv(sp_files$det3)
+d.dplyr_Hor <- sp_det_dat_Hor %>% 
   mutate(installation_name="Horseshoe",
          species_common_name="Southern eagle ray",
-         species_scientific_name="Myliobatis tenuicaudatus ") %>%
+         species_scientific_name="Myliobatis tenuicaudatus",
+         detection_datetime=as.POSIXct(Date.and.Time..UTC.,tz="UTC",format="%d/%m/%Y %H:%M")) %>%
   rename(transmitter_id=Transmitter,
-         detection_datetime=Date.and.Time..UTC.,
          station_name=Station.Name,
-                receiver_deployment_latitude=Latitude,
-                receiver_deployment_longitude=Longitude) %>%
+         receiver_deployment_latitude=Latitude,
+         receiver_deployment_longitude=Longitude) %>%
   select(species_common_name,species_scientific_name,transmitter_id,
-         detection_datetime,station_name,
-         receiver_deployment_longitude,receiver_deployment_latitude)
+         detection_datetime,station_name,installation_name,
+         receiver_deployment_latitude,receiver_deployment_longitude)
 
+d.dplyr <- rbind(d.dplyr_Hor,d.dplyr_Cof)
 
 # Add time catagories to location summary
 location_summary <-  d.dplyr %>%
   mutate(species_scientific_name = as.factor(species_scientific_name),
          species_common_name = as.factor(species_common_name),
-         Day = date(as.POSIXct(detection_datetime,tz="UTC")),
+         Day = date(detection_datetime),
          Week = format(Day, "%Y-%W"),
          Month = format(Day, "%Y-%m")) %>%
   select(transmitter_id,
@@ -167,19 +170,19 @@ dispersal_summary_month <- location_summary_month %>%
   separate(z, c("species_common_name", "transmitter_id", "Month"), sep = "([._:])")
 
 # Save the file as an RDS object
-Dispersal_Timescales_Harlequin <- list(Daily=dispersal_summary_day,
+Dispersal_Timescales_EagleRay<- list(Daily=dispersal_summary_day,
                                        Weekly=dispersal_summary_week,
                                        Monthly=dispersal_summary_month)
-saveRDS(Dispersal_Timescales_Harlequin, file = "Data/Dispersal_Timescales_Harlequin.RDS") # Save to github
+saveRDS(Dispersal_Timescales_EagleRay, file = "Data/Dispersal_Timescales_EagleRay.RDS") # Save to github
 
 ##############################################
 
 
 # Compute a histogram of distance per month
-disp.hist <- Dispersal_Timescales_Harlequin$Monthly %>%
+disp.hist <- Dispersal_Timescales_EagleRay$Weekly %>%
   ggplot(aes(maxDistkm)) + geom_histogram() +theme_bw()
 # Compute a histogram of num receiver stations
-stat.hist <- Dispersal_Timescales_Harlequin$Monthly %>%
+stat.hist <- Dispersal_Timescales_EagleRay$Weekly %>%
   ggplot(aes(n_stations)) + geom_histogram() +theme_bw()
 ggarrange(disp.hist,stat.hist)
 # 
