@@ -17,23 +17,14 @@ library(ggpubr)
 # Location where the raw acoustic telemetry and Bruv data are stored
 datafolder <- "/Users/uqrdwye2/Dropbox/shark_mpa_model_v400/SA/DEW Marine Parks project/"
 
-#Kingfish
-sp_det1 <- paste0(datafolder,"Kingfish/Detections/Kingfish_CoffinBay_2019.csv")
-sp_det2 <- paste0(datafolder,"Kingfish/Detections/Kingfish_CoffinBay_2021.csv")
-sp_det3 <- paste0(datafolder,"Kingfish/Detections/Kingfish_LongDistance.csv")
-sp_det4 <- paste0(datafolder,"Kingfish/Detections/Kingfish_Neptunes_2019.csv")
-sp_det5 <- paste0(datafolder,"Kingfish/Detections/Kingfish_Victoria_2020.csv")
-
-#sp_receivermet <- paste0(datafolder,....csv")
-sp_tagmet <- paste0(datafolder,"Kingfish/IMOS_transmitter_deployment_metadata.csv")
-sp_meas <- paste0(datafolder,"Kingfish/IMOS_animal_measurements.csv")
+#Trevally
+sp_det <- paste0(datafolder,"Trevally/Trevally_RAW_2020_2021.csv")
+#sp_receivermet <- paste0(datafolder,"Snapper/IMOS_receiver_deployment_metadata.csv")
+sp_tagmet <- paste0(datafolder,"Snapper/IMOS_transmitter_deployment_metadata.csv")
+sp_meas <- paste0(datafolder,"Snapper/IMOS_animal_measurements.csv")
 
 ## specify files to QC - use supplied example .csv data
-sp_files <- list(det1 = sp_det1,
-                 det2 = sp_det2,
-                 det3 = sp_det3,
-                 det4 = sp_det4,
-                 det5 = sp_det5,
+sp_files <- list(det = sp_det,
                  #rmeta = sp_receivermet,
                  tmeta = sp_tagmet,
                  meas = sp_meas)
@@ -45,57 +36,26 @@ sp_files <- list(det1 = sp_det1,
 # Read in the detection dataset
 #qc.out <- readRDS("Data/snapper_detQC.RDS") # Load detection data
 #d.qc <- grabQC(qc.out, what = "dQC") # Grab QC detection-only data
-sp_det_dat1 <- read.csv(sp_files$det1) %>% #UTC sentence case LonLat
-  mutate(Date.and.Time..UTC.=ymd_hms(Date.and.Time..UTC.,tz="UTC")) %>%
-  select(Transmitter,Date.and.Time..UTC.,Latitude,Longitude)
-sp_det_dat2 <- read.csv(sp_files$det2) %>% #UTC sentence case LonLat
-  mutate(Date.and.Time..UTC.=ymd_hms(Date.and.Time..UTC.,tz="UTC")) %>%
-  select(Transmitter,Date.and.Time..UTC.,Latitude,Longitude)
-sp_det_dat3 <- read.csv(sp_files$det3) %>% #Local lower case lonlat
-  rename(Longitude = longitude,
-         Latitude = latitude) %>%
-  mutate(Date.and.Time..local.=dmy_hms(Date.and.Time..local.,tz="Australia/Adelaide"),
-         Date.and.Time..UTC. = with_tz(Date.and.Time..local., "UTC")) %>%
-  select(Transmitter,Date.and.Time..UTC.,Latitude,Longitude)
-sp_det_dat4 <- read.csv(sp_files$det4) %>% #UTC sentence case LonLat
-  mutate(Date.and.Time..UTC.=ymd_hms(Date.and.Time..UTC.,tz="UTC"))%>%
-  select(Transmitter,Date.and.Time..UTC.,Latitude,Longitude)
-sp_det_dat5 <- read.csv(sp_files$det5) %>% #Local sentence case LonLat
-  mutate(Date.and.Time..Local.=dmy_hms(Date.and.Time..Local.,tz="Australia/Adelaide"),
-         Date.and.Time..UTC. = with_tz(Date.and.Time..Local., "UTC"))%>%
-  select(Transmitter,Date.and.Time..UTC.,Latitude,Longitude)
-## Combine detection datasets
-sp_det_dat <- rbind(sp_det_dat1,sp_det_dat2,sp_det_dat3,sp_det_dat4,sp_det_dat5)
 
-#sp_receivermet_dat <- read.csv(sp_files$rmeta)
-sp_tagmet_dat <-  read.csv(sp_files$tmeta)
-
-# Extract only the variables we are interested renaming them to remora format
-d.dplyr <- sp_det_dat %>% 
-  rename(transmitter_id=Transmitter,
-         detection_datetime=Date.and.Time..UTC.) %>%
-  mutate(station_name="Unknown",
-         receiver_deployment_longitude = Longitude,
-         receiver_deployment_latitude = Latitude) %>%
-  left_join(sp_tagmet_dat) %>% # Join to extract species and common name
-  select(species_common_name,species_scientific_name,
-         transmitter_id,detection_datetime,station_name,
-         receiver_deployment_longitude,receiver_deployment_latitude)
+sp_det_dat <- read.csv(sp_files$det) %>% #UTC sentence case LonLat
+  mutate(Date.and.Time..UTC.=as.POSIXct(Date.and.Time..UTC.,tz="UTC",format="%Y/%m/%d")) %>%
+  select(Transmitter,Date.and.Time..UTC.,Latitude,Longitude,Station.Name)
 
 # Add time catagories to location summary
-location_summary <-  d.dplyr %>%
+location_summary <-  d.qc %>%
   mutate(species_scientific_name = as.factor(species_scientific_name),
          species_common_name = as.factor(species_common_name),
          Day = date(detection_datetime),
          Week = format(Day, "%Y-%W"),
          Month = format(Day, "%Y-%m")) %>%
-  select(transmitter_id,
+  select(transmitter_id,tagging_project_name,
          species_common_name,species_scientific_name,
          detection_datetime,
-         station_name,
+         installation_name,station_name,
          receiver_deployment_longitude, 
          receiver_deployment_latitude,
          Day,Week,Month)
+
 
 ### Days ------------
 # Unite columns to get unique detections at receiver stations within a specified time interval
@@ -167,19 +127,19 @@ dispersal_summary_month <- location_summary_month %>%
   separate(z, c("species_common_name", "transmitter_id", "Month"), sep = "([._:])")
 
 # Save the file as an RDS object
-Dispersal_Timescales_Kingfish <- list(Daily=dispersal_summary_day,
+Dispersal_Timescales_Snapper <- list(Daily=dispersal_summary_day,
                                      Weekly=dispersal_summary_week,
                                      Monthly=dispersal_summary_month)
-saveRDS(Dispersal_Timescales_Kingfish, file = "Data/Dispersal_Timescales_Kingfish.RDS") # Save to github
+saveRDS(Dispersal_Timescales_Snapper, file = "Data/Dispersal_Timescales_Snapper.RDS") # Save to github
 
 ##############################################
 
 
 # Compute a histogram of distance per month
-disp.hist <- Dispersal_Timescales_Kingfish$Monthly %>%
+disp.hist <- Dispersal_Timescales_Snapper$Monthly %>%
   ggplot(aes(maxDistkm)) + geom_histogram() +theme_bw()
 # Compute a histogram of num receiver stations
-stat.hist <- Dispersal_Timescales_Kingfish$Monthly %>%
+stat.hist <- Dispersal_Timescales_Snapper$Monthly %>%
   ggplot(aes(n_stations)) + geom_histogram() +theme_bw()
 ggarrange(disp.hist,stat.hist)
 # 
