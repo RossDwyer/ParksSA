@@ -4,6 +4,8 @@ Dispersal_Timescales_Harlequin <- readRDS(file = "Data/Dispersal_Timescales_Harl
 Dispersal_Timescales_Kingfish <- readRDS(file = "Data/Dispersal_Timescales_Kingfish.RDS")
 Dispersal_Timescales_Snapper <- readRDS(file = "Data/Dispersal_Timescales_Snapper.RDS")
 Dispersal_Timescales_Trevally <- readRDS(file = "Data/Dispersal_Timescales_Trevally.RDS")
+Dispersal_Timescales_BTWrasse<- readRDS(file = "Data/Dispersal_Timescales_BTWrasse.RDS")
+Dispersal_Timescales_BlueGroper <- readRDS(file = "Data/Dispersal_Timescales_BlueGroper.RDS")
 
 
 # Compute a histogram of distance per month
