@@ -1,5 +1,6 @@
 ## Dispersal Kernel comparisons
-## Code will take varoius detection datasets for each species and combine with the tag release metadata
+## Code will take various detection datasets for each species and combine with the tag release metadata
+## Updated function to only work with SA fish
 
 #install_github("RossDwyer/VTrack", configure.args = "--with-proj-lib=/usr/local/lib/")
 
@@ -20,7 +21,7 @@ datafolder <- "/Users/uqrdwye2/Dropbox/shark_mpa_model_v400/SA/DEW Marine Parks 
 #Snapper
 sp_det <- paste0(datafolder,"Snapper/IMOS_detections.csv")
 sp_receivermet <- paste0(datafolder,"Snapper/IMOS_receiver_deployment_metadata.csv")
-sp_tagmet <- paste0(datafolder,"Snapper/IMOS_transmitter_deployment_metadata.csv")
+sp_tagmet <- paste0(datafolder,"Snapper/IMOS_transmitter_deployment_metadata.csv") # duplicate sensor tags (some) need to combine. Filter to Gulf stvincent - ignore NSW DPI and Vic
 sp_meas <- paste0(datafolder,"Snapper/IMOS_animal_measurements.csv")
 
 ## specify files to QC - use supplied example .csv data
@@ -37,14 +38,21 @@ sp_files <- list(det = sp_det,
 qc.out <- readRDS("Data/snapper_detQC.RDS") # Load detection data
 d.qc <- grabQC(qc.out, what = "dQC") # Grab QC detection-only data
 
+# As Snapper have multiple locations where tagged, lets make sure we only use unique tags from SA  
+d.dplyr <- d.qc %>% 
+  filter(tagging_project_name %in% "Gulf St Vincent monitoring") %>%
+  select(-transmitter_id) # Remove transmitter_id as we'll be using unique tag_ids as some (dual) sensor tags
+
 # Add time catagories to location summary
-location_summary <-  d.qc %>%
-  mutate(species_scientific_name = as.factor(species_scientific_name),
+location_summary <-  d.dplyr %>%
+  mutate(transmitter_id = tag_id, # ensures the below code is compatible with using a unique tag_id (not the duplicate ping and sensor tag ids)
+         species_scientific_name = as.factor(species_scientific_name),
          species_common_name = as.factor(species_common_name),
          Day = date(detection_datetime),
          Week = format(Day, "%Y-%W"),
          Month = format(Day, "%Y-%m")) %>%
-  select(transmitter_id,tagging_project_name,
+  select(transmitter_id,
+         tagging_project_name,
          species_common_name,species_scientific_name,
          detection_datetime,
          installation_name,station_name,

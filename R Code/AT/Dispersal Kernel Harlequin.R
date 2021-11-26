@@ -1,5 +1,7 @@
 ## Dispersal Kernel comparisons
-## Code will take varoius detection datasets for each species and combine with the tag release metadata
+## Code will take various detection datasets for each species and combine with the tag release metadata
+## Updated function to use tag serial nos as old sensor tag with 2 tag ids
+## Updated function to use SA only fish
 
 #install_github("RossDwyer/VTrack", configure.args = "--with-proj-lib=/usr/local/lib/")
 
@@ -20,7 +22,7 @@ datafolder <- "/Users/uqrdwye2/Dropbox/shark_mpa_model_v400/SA/DEW Marine Parks 
 #Harlequin fish
 sp_det <- paste0(datafolder,"Harlequin fish/VUE_Export for Harlequin fish_All data.csv")
 sp_receivermet <- paste0(datafolder,"Harlequin fish/Harlequin fish station information.csv")
-sp_tagmet <- paste0(datafolder,"Harlequin fish/IMOS_Harlequin tag deployment info.csv")
+sp_tagmet <- paste0(datafolder,"Harlequin fish/IMOS_Harlequin tag deployment info.csv") # Use ids of Harlequin fish and not transmitterids to rcombine sensor tags
 sp_meas <- paste0(datafolder,"Harlequin fish/IMOS_animal_measurements.csv")
 
 ## specify files to QC - use supplied example .csv data
@@ -45,7 +47,8 @@ sp_tagmet_dat <-  read.csv(sp_files$tmeta)
 sp_det_dat <- sp_det_dat %>% 
   mutate(species_common_name="Harlequin",
          species_scientific_name="Othos dentex") %>%
-  rename(transmitter_id=Transmitter,
+  #rename(transmitter_id=Transmitter, # Use the tag ID
+  rename(transmitter_id=Transmitter.Serial, # Use the serial number as sensor PLUS pinger tag ID
          detection_datetime=Date.and.Time..UTC.,
          station_name=Station.Name) %>%
   select(species_common_name,species_scientific_name,transmitter_id,detection_datetime,station_name)
@@ -57,6 +60,10 @@ sp_receivermet_dat <- sp_receivermet_dat %>%
   select(installation_name,receiver_deployment_latitude,receiver_deployment_longitude,station_name)
 
 d.dplyr <- left_join(sp_det_dat,sp_receivermet_dat)
+# As Harlequins have multiple locations where tagged, lets make sure we only use SA ones 
+d.dplyr <- d.dplyr %>% filter(transmitter_id %in% sp_tagmet_dat$transmitter_serial_number)
+# Step reduced tags from 342,028 detections to 281,248 detections
+# Missing SN = 1090539 and SN = NA
 
 # Add time catagories to location summary
 location_summary <-  d.dplyr %>%
