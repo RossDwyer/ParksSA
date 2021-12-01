@@ -110,6 +110,6 @@ ggplot(aes(x = genus.species, y = meanmaxn, alpha = 0.5,legend=FALSE)) +
   theme(axis.text.x = element_text(angle = 45, vjust = 0.9, hjust=1),
         legend.position = c(0.8, 0.8))+
   scale_alpha(guide = 'none')
-ggsave
+ggsave("Images/MaxN_1.jpg")
 
 
