@@ -53,7 +53,7 @@ sp_det_dat <- sp_det_dat0 %>%
          station_name=Station.Name) %>%
   filter(transmitter_id %in% BTWrasseIDs$transmitter_id) %>%
   mutate(species_common_name="Bluethroat Wrasse",
-         species_scientific_name="Notolabrus tetricus ") %>%
+         species_scientific_name="Notolabrus tetricus") %>%
   select(species_common_name,species_scientific_name,transmitter_id,detection_datetime,station_name)
 
 # Extract only the variables we are interested renaming them to remora format
