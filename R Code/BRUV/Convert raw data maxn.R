@@ -61,19 +61,30 @@ genus.sp <- c("Myliobatis tenuicaudatus", #Southern eagle ray
 
 
 # Run function to generate species specific bruv data with correct 'absences'
+# Also patch on common names to align with the Dispersal kernels dataset
 maxndata_spec1 <- fextract_sp(maxndata,genus.sp[1]) # Southern eagle ray
+maxndata_spec1 <- maxndata_spec1 %>% mutate(species_common_name=="Southern eagle ray")
 maxndata_spec2 <- fextract_sp(maxndata,genus.sp[2]) # Harlequin Fish
+maxndata_spec2 <- maxndata_spec2 %>% mutate(species_common_name=="Harlequin")
 maxndata_spec3 <- fextract_sp(maxndata,genus.sp[3]) # Yellowtail Kingfish
+maxndata_spec3 <- maxndata_spec3 %>% mutate(species_common_name=="Yellowtail Kingfish")
 maxndata_spec4 <- fextract_sp(maxndata,genus.sp[4]) # Snapper
+maxndata_spec4 <- maxndata_spec4 %>% mutate(species_common_name=="Snapper")
 maxndata_spec5 <- fextract_sp(maxndata,genus.sp[5]) # Western Blue Groper 
+maxndata_spec5 <- maxndata_spec5 %>% mutate(species_common_name=="Western Blue Groper")
 maxndata_spec6 <- fextract_sp(maxndata,genus.sp[6]) # Bluethroat Wrasse 
+maxndata_spec6 <- maxndata_spec6 %>% mutate(species_common_name=="Bluethroat Wrasse")
 maxndata_spec7 <- fextract_sp(maxndata,genus.sp[7]) # Bronze Whaler
+maxndata_spec7 <- maxndata_spec7 %>% mutate(species_common_name=="Bronze whaler")
 maxndata_spec8 <- fextract_sp(maxndata,genus.sp[8]) # Dusky Whaler 
+maxndata_spec8 <- maxndata_spec8 %>% mutate(species_common_name=="Dusky whaler")
 maxndata_spec9 <- fextract_sp(maxndata,genus.sp[9]) # Silver Trevally
+maxndata_spec9 <- maxndata_spec9 %>% mutate(species_common_name=="silver trevally")
 maxndata_spec10 <- fextract_sp(maxndata,genus.sp[10]) # White Shark
+maxndata_spec10 <- maxndata_spec10 %>% mutate(species_common_name=="White shark")
 
 # Combine into single dataset
-maxndata_spec_all <- rbind(maxndata_spec1,
+maxndata_spec_all <- list(maxndata_spec1,
                            maxndata_spec2,
                            maxndata_spec3,
                            maxndata_spec4,
@@ -83,22 +94,22 @@ maxndata_spec_all <- rbind(maxndata_spec1,
                            maxndata_spec8,
                            maxndata_spec9,
                            maxndata_spec10)
+saveRDS(maxndata_spec_all, file = "Data/MaxNs with absences.RDS") # Save to github
+
 
 # Generate summarySE table for all 5 species combined
-sumndata_site_all <- maxndata_spec_all %>%
+maxndata_spec_all.df <- do.call(rbind,maxndata_spec_all) #Also prepare a dataframe
+maxndata_spec_all.df %>%
   summarySE(measurevar="maxn", groupvars=c("genus.species")) %>%
-  rename(c('maxn' = 'meanmaxn')) 
-
-  ## plot
-  ggplot(sumndata_site_all, 
-         aes(x = genus.species, y = meanmaxn, alpha = 0.5,legend=FALSE)) + 
-    geom_errorbar(width=.1, aes(ymin=meanmaxn-se, ymax=meanmaxn+se), colour="black")+
-    labs(title = "Max N with absences", x = "Species", y = "Max N") +
-    theme_bw() + 
-    geom_bar(stat = "identity")+
-    theme(axis.text.x = element_text(angle = 45, vjust = 0.9, hjust=1),
-          legend.position = c(0.8, 0.8))+
-    scale_alpha(guide = 'none')
-
+  rename(c('maxn' = 'meanmaxn')) %>%
+ggplot(aes(x = genus.species, y = meanmaxn, alpha = 0.5,legend=FALSE)) + 
+  geom_errorbar(width=.1, aes(ymin=meanmaxn-se, ymax=meanmaxn+se), colour="black")+
+  labs(title = "Max N with absences", x = "Species", y = "Max N") +
+  theme_bw() + 
+  geom_bar(stat = "identity")+
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.9, hjust=1),
+        legend.position = c(0.8, 0.8))+
+  scale_alpha(guide = 'none')
+ggsave
 
 
