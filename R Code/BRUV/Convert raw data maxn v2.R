@@ -20,39 +20,37 @@ maxnmeta <- read.csv(paste0(datafolder,"BRUVS data/SA.Synthesis.Metadata.csv"))
 # Combine the data and metadata files
 maxndata1 <- maxnmeta %>%
   dplyr::select(sample,latitude,longitude,location,status,site,depth) %>%
-  right_join(maxndata)
+  right_join(maxndata) %>%
+  dplyr::select(-family,-genus,-species,-id)
 
-# Function to generate species specific bruv data with correct 'absences
+# Function to generate species specific bruv data with correct absences
 fextract_sp <- function(data,singlesp){
   
   maxndata_spec <- data %>% filter(genus.species ==singlesp)  # Extract data for single species
-  all_drops <- unique(as.character(data$sample))   # What are the names of the BRUV drops from all drops?
+  
+  all_drops <- maxnmeta %>% dplyr::select(sample,latitude,longitude,location,status,site,depth,campaignid) # Only the columns we are interested in
+  
+  all_drops_sample <- unique(as.character(all_drops$sample))   # What are the names of the BRUV drops from all drops?
   
   # Which drops were in a site with one of our named species, but didn't see any of this species on a survey? 
   # I.e. generates the 'absences'
-  
-  maxndata_nospec <- data %>% filter(genus.species != singlesp)  # Extract data for single species
-  nosspec_setids <- sort(unique(as.character(maxndata_nospec$sample))) # what are the set ids where species other than our fish speces were spotted  
-  nosinglesp_setids <- nosspec_setids[nosspec_setids %!in% maxndata_spec$sample] # Extract set_ids not present in the single species data (i.e. absences)
-  maxndata_spec_nospecdups <- data %>% filter(sample %in% nosinglesp_setids) # filter absences dataset for these set codes
-  maxndata_spec_nospec<- maxndata_spec_nospecdups[!duplicated(maxndata_spec_nospecdups$sample),] # remove the duplicated set ids where more than one species was spotted
-  
-  maxndata_spec_nospec <- maxndata_spec_nospec %>% mutate(family = "", # Add the missing columns and the Zeros for these BRUV surveys
-                                                          genus = "",
-                                                          species = "",
-                                                          maxn = 0,
-                                                          genus.species = singlesp)
-  
+  nosinglesp_setids <- all_drops[all_drops_sample %!in% maxndata_spec$sample,'sample'] # Extract set_ids not present in the single species data (i.e. absences)
+  maxndata_nospec <- all_drops %>% 
+    filter(sample %in% nosinglesp_setids) %>% # filter absences dataset for these set codes
+    mutate(maxn = 0, # Add the missing columns and the Zeros for these BRUV surveys
+           genus.species = singlesp) %>%
+    distinct()
+    
   #Assign the correct zeros to the shark bruv data dataframe (bind our shark species, other animals and no animals dataframes)
-  maxndata_spec <- rbind(maxndata_spec,maxndata_spec_nospec) %>% arrange(sample) # Arrange by BRUV deployment id
+  maxndata_spec <- rbind(maxndata_spec,maxndata_nospec) %>% arrange(sample) # Arrange by BRUV deployment id
   
   return(maxndata_spec)
 }
 
 #From singlesp
-genus.sp <- c("Myliobatis tenuicaudatus", #Southern eagle ray
-             "Othos dentex", #Harlequin Fish
-             "Seriola lalandi", #Yellowtail Kingfish (Missing from BRUV dataset)
+genus.sp <- c("Myliobatis tenuicaudatus", #Southern eagle ray (Age unknown)
+             "Othos dentex", #Harlequin Fish (Age unknown)
+             "Seriola lalandi", #Yellowtail Kingfish 
              "Chrysophrys auratus", #Snapper 
              "Achoerodus gouldii", #Western Blue Groper 
              "Notolabrus tetricus", #Bluethroat Wrasse 
@@ -61,12 +59,10 @@ genus.sp <- c("Myliobatis tenuicaudatus", #Southern eagle ray
              "Pseudocaranx spp", #Silver Trevally (Coded as this in the BRUVS dataset)
              "Carcharodon carcharias") # White Shark
 
-
-
 # Run function to generate species specific bruv data with correct 'absences'
 # Also patch on common names to align with the Dispersal kernels dataset
 maxndata_spec1 <- fextract_sp(maxndata1,genus.sp[1]) # Southern eagle ray
-maxndata_spec1 <- maxndata_spec1 %>% mutate(species_common_name="Southern eagle ray")
+maxndata_spec1 <- maxndata_spec1 %>% mutate(species_common_name="Southern Eagle Ray")
 maxndata_spec2 <- fextract_sp(maxndata1,genus.sp[2]) # Harlequin Fish
 maxndata_spec2 <- maxndata_spec2 %>% mutate(species_common_name="Harlequin")
 maxndata_spec3 <- fextract_sp(maxndata1,genus.sp[3]) # Yellowtail Kingfish
@@ -78,13 +74,13 @@ maxndata_spec5 <- maxndata_spec5 %>% mutate(species_common_name="Western Blue Gr
 maxndata_spec6 <- fextract_sp(maxndata1,genus.sp[6]) # Bluethroat Wrasse 
 maxndata_spec6 <- maxndata_spec6 %>% mutate(species_common_name="Bluethroat Wrasse")
 maxndata_spec7 <- fextract_sp(maxndata1,genus.sp[7]) # Bronze Whaler
-maxndata_spec7 <- maxndata_spec7 %>% mutate(species_common_name="Bronze whaler")
+maxndata_spec7 <- maxndata_spec7 %>% mutate(species_common_name="Bronze Whaler")
 maxndata_spec8 <- fextract_sp(maxndata1,genus.sp[8]) # Dusky Whaler 
-maxndata_spec8 <- maxndata_spec8 %>% mutate(species_common_name="Dusky whaler")
+maxndata_spec8 <- maxndata_spec8 %>% mutate(species_common_name="Dusky Whaler")
 maxndata_spec9 <- fextract_sp(maxndata1,genus.sp[9]) # Silver Trevally
-maxndata_spec9 <- maxndata_spec9 %>% mutate(species_common_name="silver trevally")
+maxndata_spec9 <- maxndata_spec9 %>% mutate(species_common_name="Silver Trevally")
 maxndata_spec10 <- fextract_sp(maxndata1,genus.sp[10]) # White Shark
-maxndata_spec10 <- maxndata_spec10 %>% mutate(species_common_name="White shark")
+maxndata_spec10 <- maxndata_spec10 %>% mutate(species_common_name="White Shark")
 
 # Check raw data
 check0 <- maxndata1 %>% filter(genus.species=="Chrysophrys auratus") #records with at least one of species seen 
@@ -110,6 +106,30 @@ maxndata_spec_all <- list(maxndata_spec1,
                            maxndata_spec8,
                            maxndata_spec9,
                            maxndata_spec10)
+
+names(maxndata_spec_all) <- c("Southern_Eagle_Ray", 
+                              "Harlequin",
+                              "Yellowtail_Kingfish",
+                              "Snapper",
+                              "Western_Blue_Groper", 
+                              "Bluethroat_Wrasse",
+                              "Bronze_Whaler",
+                              "Dusky_Whaler",
+                              "Silver_Trevally",
+                              "White_Shark")
+
+#From singlesp
+genus.sp <- c("Myliobatis tenuicaudatus", #Southern eagle ray (Age unknown)
+              "Othos dentex", #Harlequin Fish (Age unknown)
+              "Seriola lalandi", #Yellowtail Kingfish 
+              "Chrysophrys auratus", #Snapper 
+              "Achoerodus gouldii", #Western Blue Groper 
+              "Notolabrus tetricus", #Bluethroat Wrasse 
+              "Carcharhinus brachyurus", #Bronze Whaler 
+              "Carcharhinus obscurus", #Dusky Whaler  (Missing from BRUV dataset)
+              "Pseudocaranx spp", #Silver Trevally (Coded as this in the BRUVS dataset)
+              "Carcharodon carcharias") # White Shark
+
 saveRDS(maxndata_spec_all, file = "Data/MaxNs with absences.RDS") # Save to github
 
 # Generate summarySE table for all 5 species combined
