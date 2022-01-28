@@ -55,7 +55,7 @@ d.dplyr <- sp_det_dat0 %>%
          receiver_deployment_latitude=Latitude,
          receiver_deployment_longitude=Longitude) %>%
   filter(transmitter_id %in% DuskyIDs$transmitter_id) %>%
-  mutate(species_common_name="Dusky whaler",
+  mutate(species_common_name="Dusky Whaler",
          species_scientific_name="Carcharhinus obscurus") %>%
   select(species_common_name,species_scientific_name,transmitter_id,
          detection_datetime,station_name,

@@ -55,7 +55,7 @@ d.dplyr <- sp_det_dat0 %>%
          receiver_deployment_latitude=Latitude,
          receiver_deployment_longitude=Longitude) %>%
   filter(transmitter_id %in% BronzeIDs$transmitter_id) %>%
-  mutate(species_common_name="Bronze whaler",
+  mutate(species_common_name="Bronze Whaler",
          species_scientific_name="Carcharhinus brachyurus") %>%
   select(species_common_name,species_scientific_name,transmitter_id,
          detection_datetime,station_name,

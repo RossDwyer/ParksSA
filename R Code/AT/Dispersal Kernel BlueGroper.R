@@ -1,5 +1,5 @@
 ## Dispersal Kernel comparisons
-## Code will take varoius detection datasets for each species and combine with the tag release metadata
+## Code will take various detection datasets for each species and combine with the tag release metadata
 
 #install_github("RossDwyer/VTrack", configure.args = "--with-proj-lib=/usr/local/lib/")
 
@@ -48,19 +48,19 @@ BlueGropIDs <- sp_tagmet_dat %>%
 
 # Extract only the variables we are interested renaming them to remora format
 sp_det_dat <- sp_det_dat0 %>% 
-  rename(transmitter_id=Transmitter,
+  dplyr::rename(transmitter_id=Transmitter,
          detection_datetime=Date.and.Time..UTC.,
          station_name=Station.Name) %>%
   filter(transmitter_id %in% BlueGropIDs$transmitter_id) %>%
   mutate(species_common_name="Western Blue Groper",
          species_scientific_name="Achoerodus gouldii") %>%
-  select(species_common_name,species_scientific_name,transmitter_id,detection_datetime,station_name)
+  dplyr::select(species_common_name,species_scientific_name,transmitter_id,detection_datetime,station_name)
 
 # Extract only the variables we are interested renaming them to remora format
 sp_receivermet_dat <- sp_receivermet_dat %>% 
-  rename(receiver_deployment_latitude=last_deployed_latitude,
+  dplyr::rename(receiver_deployment_latitude=last_deployed_latitude,
          receiver_deployment_longitude=last_deployed_longitude) %>%
-  select(installation_name,receiver_deployment_latitude,receiver_deployment_longitude,station_name)
+  dplyr::select(installation_name,receiver_deployment_latitude,receiver_deployment_longitude,station_name)
 
 d.dplyr <- left_join(sp_det_dat,sp_receivermet_dat)
 

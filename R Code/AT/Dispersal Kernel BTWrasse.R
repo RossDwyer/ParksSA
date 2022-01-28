@@ -10,6 +10,7 @@ library(remora)
 library(sf)
 library(sp)
 library(ggpubr)
+library(dplyr)
 #source("R/2018-10-15_displot.R")
 
 ## Get the tag files ready and run the QC -------------
@@ -44,23 +45,23 @@ sp_tagmet_dat <-  read.csv(sp_files$tmeta)
 # What are the Id's of the blue throat wrasse
 BTWrasseIDs <- sp_tagmet_dat %>%
   filter(species_common_name=="Bluethroat Wrasse") %>%
-  select(transmitter_id) 
+  dplyr::select(transmitter_id) 
 
 # Extract only the variables we are interested renaming them to remora format
 sp_det_dat <- sp_det_dat0 %>% 
-  rename(transmitter_id=Transmitter,
+  dplyr::rename(transmitter_id=Transmitter,
          detection_datetime=Date.and.Time..UTC.,
          station_name=Station.Name) %>%
   filter(transmitter_id %in% BTWrasseIDs$transmitter_id) %>%
   mutate(species_common_name="Bluethroat Wrasse",
          species_scientific_name="Notolabrus tetricus") %>%
-  select(species_common_name,species_scientific_name,transmitter_id,detection_datetime,station_name)
+  dplyr::select(species_common_name,species_scientific_name,transmitter_id,detection_datetime,station_name)
 
 # Extract only the variables we are interested renaming them to remora format
 sp_receivermet_dat <- sp_receivermet_dat %>% 
-  rename(receiver_deployment_latitude=last_deployed_latitude,
+  dplyr::rename(receiver_deployment_latitude=last_deployed_latitude,
          receiver_deployment_longitude=last_deployed_longitude) %>%
-  select(installation_name,receiver_deployment_latitude,receiver_deployment_longitude,station_name)
+  dplyr::select(installation_name,receiver_deployment_latitude,receiver_deployment_longitude,station_name)
 
 d.dplyr <- left_join(sp_det_dat,sp_receivermet_dat)
 
@@ -71,7 +72,7 @@ location_summary <-  d.dplyr %>%
          Day = date(as.POSIXct(detection_datetime,tz="UTC")),
          Week = format(Day, "%Y-%W"),
          Month = format(Day, "%Y-%m")) %>%
-  select(transmitter_id,
+  dplyr::select(transmitter_id,
          species_common_name,species_scientific_name,
          detection_datetime,
          station_name,
@@ -97,7 +98,7 @@ out2 <- tapply(1:nrow(location_summary_day), location_summary_day$z, fGCdist) # 
 
 dispersal_summary_day <- location_summary_day %>%
   group_by(z) %>%
-  summarize(n_stations=n()) %>%
+  dplyr::summarize(n_stations=n()) %>%
   mutate(maxDistkm = round(as.numeric(as.vector(out2)),2)) %>%
   ungroup() %>%
   separate(z, c("species_common_name", "transmitter_id", "Day"), sep = "([._:])")
@@ -120,7 +121,7 @@ out2 <- tapply(1:nrow(location_summary_week), location_summary_week$z, fGCdist) 
 
 dispersal_summary_week <- location_summary_week %>%
   group_by(z) %>%
-  summarize(n_stations=n()) %>%
+  dplyr::summarize(n_stations=n()) %>%
   mutate(maxDistkm = round(as.numeric(as.vector(out2)),2)) %>%
   ungroup() %>%
   separate(z, c("species_common_name", "transmitter_id", "Week"), sep = "([._:])")
@@ -143,7 +144,7 @@ out2 <- tapply(1:nrow(location_summary_month), location_summary_month$z, fGCdist
 
 dispersal_summary_month <- location_summary_month %>%
   group_by(z) %>%
-  summarize(n_stations=n()) %>%
+  dplyr::summarize(n_stations=n()) %>%
   mutate(maxDistkm = round(as.numeric(as.vector(out2)),2)) %>%
   ungroup() %>%
   separate(z, c("species_common_name", "transmitter_id", "Month"), sep = "([._:])")

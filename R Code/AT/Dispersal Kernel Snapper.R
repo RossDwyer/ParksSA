@@ -29,19 +29,19 @@ sp_files <- list(det = sp_det,
                  rmeta = sp_receivermet,
                  tmeta = sp_tagmet,
                  meas = sp_meas)
-#qc.out <- runQC(sp_files) # Run remora::runQC() to combine fields 
+qc.out <- runQC(sp_files) # Run remora::runQC() to combine fields 
 #saveRDS(qc.out, file = "Data/snapper_detQC.RDS") # Save to github
 
 ## Get the data ready for generating temporal dispersal metrics --------------
 
 # Read in the detection dataset
-qc.out <- readRDS("Data/snapper_detQC.RDS") # Load detection data
+#qc.out <- readRDS("Data/snapper_detQC.RDS") # Load detection data
 d.qc <- grabQC(qc.out, what = "dQC") # Grab QC detection-only data
 
 # As Snapper have multiple locations where tagged, lets make sure we only use unique tags from SA  
 d.dplyr <- d.qc %>% 
   filter(tagging_project_name %in% "Gulf St Vincent monitoring") %>%
-  select(-transmitter_id) # Remove transmitter_id as we'll be using unique tag_ids as some (dual) sensor tags
+  dplyr::select(-transmitter_id) # Remove transmitter_id as we'll be using unique tag_ids as some (dual) sensor tags
 
 # Add time catagories to location summary
 location_summary <-  d.dplyr %>%
@@ -51,14 +51,14 @@ location_summary <-  d.dplyr %>%
          Day = date(detection_datetime),
          Week = format(Day, "%Y-%W"),
          Month = format(Day, "%Y-%m")) %>%
-  select(transmitter_id,
-         tagging_project_name,
-         species_common_name,species_scientific_name,
-         detection_datetime,
-         installation_name,station_name,
-         receiver_deployment_longitude, 
-         receiver_deployment_latitude,
-         Day,Week,Month)
+  dplyr::select(transmitter_id,
+                tagging_project_name,
+                species_common_name,species_scientific_name,
+                detection_datetime,
+                installation_name,station_name,
+                receiver_deployment_longitude, 
+                receiver_deployment_latitude,
+                Day,Week,Month)
 
 
 ### Days ------------
@@ -68,7 +68,7 @@ location_summary_day <-
   unite("z", species_common_name, transmitter_id, Day, remove = FALSE) %>%
   distinct(z,receiver_deployment_longitude,receiver_deployment_latitude) %>%
   arrange(z)
-  
+
 # Function to calculate great circle distances
 fGCdist <- function(x) {
   tempsf <- SpatialPoints(location_summary_day[x, c("receiver_deployment_longitude","receiver_deployment_latitude")], 
@@ -79,7 +79,7 @@ out2 <- tapply(1:nrow(location_summary_day), location_summary_day$z, fGCdist) # 
 
 dispersal_summary_day <- location_summary_day %>%
   group_by(z) %>%
-  summarize(n_stations=n()) %>%
+  dplyr::summarize(n_stations=n()) %>%
   mutate(maxDistkm = round(as.numeric(as.vector(out2)),2)) %>%
   ungroup() %>%
   separate(z, c("species_common_name", "transmitter_id", "Day"), sep = "([._:])")
@@ -102,7 +102,7 @@ out2 <- tapply(1:nrow(location_summary_week), location_summary_week$z, fGCdist) 
 
 dispersal_summary_week <- location_summary_week %>%
   group_by(z) %>%
-  summarize(n_stations=n()) %>%
+  dplyr::summarize(n_stations=n()) %>%
   mutate(maxDistkm = round(as.numeric(as.vector(out2)),2)) %>%
   ungroup() %>%
   separate(z, c("species_common_name", "transmitter_id", "Week"), sep = "([._:])")
@@ -125,7 +125,7 @@ out2 <- tapply(1:nrow(location_summary_month), location_summary_month$z, fGCdist
 
 dispersal_summary_month <- location_summary_month %>%
   group_by(z) %>%
-  summarize(n_stations=n()) %>%
+  dplyr::summarize(n_stations=n()) %>%
   mutate(maxDistkm = round(as.numeric(as.vector(out2)),2)) %>%
   ungroup() %>%
   separate(z, c("species_common_name", "transmitter_id", "Month"), sep = "([._:])")

@@ -52,7 +52,7 @@ d.dplyr <- sp_det_dat %>%
          receiver_deployment_longitude = Longitude,
          receiver_deployment_latitude = Latitude) %>%
   #left_join(sp_tagmet_dat,by="transmitter_id") %>% # Join to extract species and common name
-  mutate(species_common_name = "silver trevally",
+  mutate(species_common_name = "Silver Trevally",
          species_scientific_name = "Pseudocaranx georgianus") %>%
   select(species_common_name,species_scientific_name,
          transmitter_id,detection_datetime,station_name,

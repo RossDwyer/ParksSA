@@ -51,35 +51,34 @@ sp_det_dat_Cof <- rbind(sp_det_dat1,sp_det_dat2)
 sp_tagmet_dat <-  read.csv(sp_files$tmeta)
 
 sp_det_dat_Cof <- sp_det_dat_Cof %>% 
-  mutate(species_common_name="Southern eagle ray",
+  mutate(species_common_name="Southern Eagle Ray",
          species_scientific_name="Myliobatis tenuicaudatus",
-         detection_datetime=as.POSIXct(detection_datetime,tz="UTC")) %>%
-  rename(transmitter_id=Transmitter,
-         detection_datetime=Date.and.Time..UTC.,
-         station_name=Station.Name) %>%
-  select(species_common_name,species_scientific_name,transmitter_id,
-         detection_datetime,station_name)
+         detection_datetime=as.POSIXct(Date.and.Time..UTC.,tz="UTC")) %>%
+  dplyr::rename(transmitter_id=Transmitter,
+                station_name=Station.Name) %>%
+  dplyr::select(species_common_name,species_scientific_name,transmitter_id,
+                detection_datetime,station_name)
 
 # Coffin Bay receiver data
 sp_receivermet_dat_Cof <- read.csv(sp_files$rmeta)
 sp_receivermet_dat_Cof <- sp_receivermet_dat_Cof %>% 
-  rename(receiver_deployment_latitude=last_deployed_latitude,
+  dplyr::rename(receiver_deployment_latitude=last_deployed_latitude,
          receiver_deployment_longitude=last_deployed_longitude) %>%
-  select(installation_name,receiver_deployment_latitude,receiver_deployment_longitude,station_name)
+  dplyr::select(installation_name,receiver_deployment_latitude,receiver_deployment_longitude,station_name)
 d.dplyr_Cof <- left_join(sp_det_dat_Cof,sp_receivermet_dat_Cof)
 
 # Horseshoe tag data
 sp_det_dat_Hor <- read.csv(sp_files$det3)
 d.dplyr_Hor <- sp_det_dat_Hor %>% 
   mutate(installation_name="Horseshoe",
-         species_common_name="Southern eagle ray",
+         species_common_name="Southern Eagle Ray",
          species_scientific_name="Myliobatis tenuicaudatus",
          detection_datetime=as.POSIXct(Date.and.Time..UTC.,tz="UTC",format="%d/%m/%Y %H:%M")) %>%
-  rename(transmitter_id=Transmitter,
+  dplyr::rename(transmitter_id=Transmitter,
          station_name=Station.Name,
          receiver_deployment_latitude=Latitude,
          receiver_deployment_longitude=Longitude) %>%
-  select(species_common_name,species_scientific_name,transmitter_id,
+  dplyr::select(species_common_name,species_scientific_name,transmitter_id,
          detection_datetime,station_name,installation_name,
          receiver_deployment_latitude,receiver_deployment_longitude)
 
@@ -92,7 +91,7 @@ location_summary <-  d.dplyr %>%
          Day = date(detection_datetime),
          Week = format(Day, "%Y-%W"),
          Month = format(Day, "%Y-%m")) %>%
-  select(transmitter_id,
+  dplyr::select(transmitter_id,
          species_common_name,species_scientific_name,
          detection_datetime,
          station_name,
@@ -118,7 +117,7 @@ out2 <- tapply(1:nrow(location_summary_day), location_summary_day$z, fGCdist) # 
 
 dispersal_summary_day <- location_summary_day %>%
   group_by(z) %>%
-  summarize(n_stations=n()) %>%
+  dplyr::summarize(n_stations=n()) %>%
   mutate(maxDistkm = round(as.numeric(as.vector(out2)),2)) %>%
   ungroup() %>%
   separate(z, c("species_common_name", "transmitter_id", "Day"), sep = "([._:])")
@@ -141,7 +140,7 @@ out2 <- tapply(1:nrow(location_summary_week), location_summary_week$z, fGCdist) 
 
 dispersal_summary_week <- location_summary_week %>%
   group_by(z) %>%
-  summarize(n_stations=n()) %>%
+  dplyr::summarize(n_stations=n()) %>%
   mutate(maxDistkm = round(as.numeric(as.vector(out2)),2)) %>%
   ungroup() %>%
   separate(z, c("species_common_name", "transmitter_id", "Week"), sep = "([._:])")
@@ -164,7 +163,7 @@ out2 <- tapply(1:nrow(location_summary_month), location_summary_month$z, fGCdist
 
 dispersal_summary_month <- location_summary_month %>%
   group_by(z) %>%
-  summarize(n_stations=n()) %>%
+  dplyr::summarize(n_stations=n()) %>%
   mutate(maxDistkm = round(as.numeric(as.vector(out2)),2)) %>%
   ungroup() %>%
   separate(z, c("species_common_name", "transmitter_id", "Month"), sep = "([._:])")
