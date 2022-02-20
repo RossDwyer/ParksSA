@@ -1,18 +1,31 @@
 
 rm(list = ls()) # delete parameters in the workspace
 
-modelversion <- "sa_mpasizer100"
-modelname <- 'MPASizer_SA_v100.R'
-resolution <- 100
-scenario.name <- paste0('SA_Res', resolution)
+# Specify model and parameterisation
+modelid <- 100 # specify model version / id
+resolution <- 100 # modelling resolution in m
+rBRUVcatchment <- 200 # radius of BRUV catchment
+dispersal.period <- 'Weekly' # specify dispersal period
+age <- "Maturity" # specify age threshold as either "Max" or "Maturity"
+case.study.region <- "SA" # specify region name in case location names are not specified or pooled
+location.names <- case.study.region # set to 'NA' unless data is supposed to be pooled!!!!  
+MPAsizes <- c(0,seq(500,2000,500),seq(3000,5000,1000),seq(10000,30000,10000),50000,100000) # specify MPA sizes to be analysed (in m)
+fmort <- seq(0,0.5,.1)  # fishing mortality rate when fully exposed (discrete proportion per year) 
+nreplicates <- 1000 # number of replicate simulations to run
+mean.extent <- 1 # specify extent of modeling environment based on either mean (1) or max movement distances (0)  
+
+# Load model and data
+modelversion <- paste0("SA_MPAsizer",modelid)
+modelname <- paste0('SA_MPASizer_v',modelid,'.R')
+scenario.name <- paste0(case.study.region,'_Res', resolution,'_',dispersal.period,'_AgeAt',age,'_rBRUV',rBRUVcatchment)
+maindir <- paste0(getwd(),'/')
+data.folder <- 'Data/'
 
 library(stringr)
 library(dplyr)
 library(doParallel)
 
 # specify data folders and load data
-maindir <- 'C:/Users/nkrueck/Dropbox/Projects/MPA SA project with Flinders Uni/SA_MPA_model/'
-data.folder <- 'Github Dec 2021/Data/'
 results.folder <- 'Results'
 datadir <- paste0(maindir,data.folder)
 scenario.results.folder <- paste0(maindir,results.folder,'/',modelversion,'_',scenario.name,'/')
