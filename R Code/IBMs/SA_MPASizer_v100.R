@@ -138,7 +138,8 @@ SA_MPASizer_v100 <- function(species.name,   # name of species to simulate
   for (loc in 1:nlocations){
     
     locname = location.names[loc]
-    loc.num.data <- num.data$maxn  #[which(specdata$location_code == loc),] # | specdata$location_code == nlocations+1),]
+    loc.num.data <- num.data[which(num.data$location == locname),]
+    loc.num.data <- as.numeric(loc.num.data$maxn)  #[which(specdata$location_code == loc),] # | specdata$location_code == nlocations+1),]
    
     #@@@@@@@@@@@@@@@@
     # MPA size loop #
@@ -218,7 +219,7 @@ SA_MPASizer_v100 <- function(species.name,   # name of species to simulate
             if(fishAtLoc > 0){
             
               # determine home range extent for each individual in group at location
-              ilocs <- sample(length(distances),fishAtLoc,replace=FALSE)
+              ilocs <- sample(length(distances),fishAtLoc,replace=TRUE)
               idists <- distances[ilocs]
                 
               #@@@@@@@@@@@@@@@@@@
@@ -393,14 +394,14 @@ SA_MPASizer_v100 <- function(species.name,   # name of species to simulate
     sd_Fmortality = as.data.frame(sdpropn_mortality, row.names = FALSE)
     colnames(sd_Fmortality) = statsmatsHeader
     
-    mean_Foffset = as.data.frame(mean_mortalityInst_offset, row.names = FALSE)
+    mean_Foffset = as.data.frame(mean_mortality_offset, row.names = FALSE)
     colnames(mean_Foffset) = statsmatsHeader
     
-    sd_Foffset = as.data.frame(sd_mortalityInst_offset, row.names = FALSE)
+    sd_Foffset = as.data.frame(sd_mortality_offset, row.names = FALSE)
     colnames(sd_Foffset) = statsmatsHeader
     
-    other.parameters <-  as.data.frame(t(c(nreplicates,max.age,rBRUVcatchment,mean.extent,resolution)))
-    colnames(other.parameters) <- c("num_replicates", "lifetime_years","radius_BRUV_catchment", "mean_extent_chosen","resolution")
+    other_parameters <-  as.data.frame(t(c(nreplicates,max.age,rBRUVcatchment,mean.extent,resolution)))
+    colnames(other_parameters) <- c("num_replicates", "lifetime_years","radius_BRUV_catchment", "mean_extent_chosen","resolution")
  
     #return results
     returndat <- list(statstable = statstable,
@@ -414,7 +415,7 @@ SA_MPASizer_v100 <- function(species.name,   # name of species to simulate
                     sd_Fmortality = sd_Fmortality,
                     mean_Foffset = mean_Foffset,
                     sd_Foffset = sd_Foffset,
-                    other.parameters = other.parameters)
+                    other_parameters = other_parameters)
   
   return(returndat)
   
