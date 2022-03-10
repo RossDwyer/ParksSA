@@ -10,6 +10,7 @@
 rm(list = ls()) # delete parameters in the workspace
 library(stringr)
 library(dplyr)
+library(matrixStats)
 
 # DUSKY WHALER MAXN DATA - JUST ZEROS!!!!!!!!!!
 
@@ -86,12 +87,14 @@ median_prot <- mean_iprot
 mean_hr <- matrix()
 mean_nfish <- mean_iprot
 mean_nfull <- mean_iprot
+mean_npart <- mean_iprot
 #floc <- 2 #which(fmort==1)+2
 
 for (s in 1:nspecies) {
   mean_iprot[s,] <- returndat[[s]]$statstable$mean_nfull/returndat[[s]]$statstable$mean_npart #mean_protected_individuals[,3]#returndat[[s]]$mean_protected_individuals[,floc]/
                     #returndat[[s]]$mean_protected_individuals[,3] #/returndat[[s]]$statstable$mean_nfish
   mean_nfull[s,] <- returndat[[s]]$statstable$mean_nfull
+  mean_npart[s,] <- returndat[[s]]$statstable$mean_npart
   mean_prot[s,] <- returndat[[s]]$statstable$mean_prot
   median_prot[s,] <- returndat[[s]]$statstable$median_prot
   mean_hr[s] <- unique(returndat[[s]]$statstable$mean_hr)
@@ -112,14 +115,20 @@ mean_prot[,1] <- rep(0,nspecies)
 min.effective.size <- MPAsizes[min(which(colMeans(mean_prot)>0.1))]/1000
 max.effective.size <- MPAsizes[min(which(colMeans(mean_prot)>=0.5))]/1000
 
-tiff(paste0(scenario.results.folder, scenario.name,'_Protection.tiff'), units="cm", width=18, height=12, res=res)
+xlims <- c(10,100)
+
+for(xl in 1:length(xlims)){
+  
+  xlim <- xlims[xl]
+  
+  tiff(paste0(scenario.results.folder, scenario.name,'_Protection',xlim,'km.tiff'), units="cm", width=18, height=12, res=res)
 
   par(mar=c(5.1, 4.1, 4.1, 12.1)) # this is usually the default
 
-  plot(t(MPAsizes/1000),mean_prot[1,],type='l',xlim = c(0,10),ylim = c(0,1),
+  plot(t(MPAsizes/1000),mean_prot[1,],type='l',xlim = c(0,xlim),ylim = c(0,1),
        xlab = "MPA size (km)", ylab = "Time spent in MPA",
        lty=ltys[s],col=cols[s],lwd=lwd)
-  axis(side = 1, at = seq(0,10,1))
+  axis(side = 1, at = seq(0,xlim,xlim/10))
   
   # add effective area
   polygon(c(min.effective.size,min.effective.size,max.effective.size,max.effective.size),c(0,1,1,0),col='light green',border="light green")
@@ -139,9 +148,9 @@ tiff(paste0(scenario.results.folder, scenario.name,'_Protection.tiff'), units="c
   legend("topright", inset=c(-0.6,0), legend=str_replace_all(species.names.ordered,'_',' '), 
          lty=ltys[1:nspecies],col=cols[1:nspecies],lwd=2) #, title="Group")
   
-dev.off()
-par(xpd=FALSE)
-
+  dev.off()
+  par(xpd=FALSE)
+}
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 # Calculate MPA size to achieve certain protection levels ##### COULD do by group!!!!!!!!
@@ -291,6 +300,7 @@ for (plotnum in 1:length(fmortcols)){
   par(xpd=FALSE)
 }
 
+
 #@@@@@@@@@@@@@@@@@@@@@@@@@@
 # Probability of survival @
 #@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -311,11 +321,11 @@ for (plotnum in 1:length(fmortcols)){
   axis(side = 1, at = seq(0,xlim,xlim/10))
   
   if(length(returndat)>1){
-   for (s in 1:nspecies) {
-    fsurvs[s,,plotnum] <- returndat[[s]]$mean_survival_probability[,fmortcols[plotnum]]
-    fsurvs[s,1,plotnum] <- 1-fmortplot[plotnum]
-    lines(MPAsizes/1000, fsurvs[s,,plotnum],col=cols[s],lty=ltys[s],lwd=lwd)
-   }
+    for (s in 1:nspecies) {
+      fsurvs[s,,plotnum] <- returndat[[s]]$mean_survival_probability[,fmortcols[plotnum]]
+      fsurvs[s,1,plotnum] <- 1-fmortplot[plotnum]
+      lines(MPAsizes/1000, fsurvs[s,,plotnum],col=cols[s],lty=ltys[s],lwd=lwd)
+    }
   }
   par(xpd=TRUE)
   legend("topright", inset=c(-0.6,0), legend=str_replace_all(species.names.ordered,'_',' '), 
@@ -323,3 +333,154 @@ for (plotnum in 1:length(fmortcols)){
   dev.off()
   par(xpd=FALSE)
 }
+
+
+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+# Plot number of fully protected individuals ####
+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+# specify effective range
+#min.effective.size <- MPAsizes[min(which(colMeans(mean_prot)>0.1))]/1000
+#max.effective.size <- MPAsizes[min(which(colMeans(mean_prot)>=0.5))]/1000
+
+protection.type = 'Fully' # or partially
+response = 'Density'
+response2 <- "relative"
+pMPAsizes <- MPAsizes[MPAsizes!=1]
+
+if(protection.type=='Fully'){mean_nprot <- mean_nfull
+}else{mean_nprot <- mean_npart}
+
+# individuals per 100 m2
+if(response == 'Density'){
+mean_nprot <- mean_nprot/t(matrix(rep(MPAsizes,nspecies),length(MPAsizes),nspecies))*100
+ylabel <- paste0(protection.type, ' protected individuals (/100 m^2)')
+} else {ylabel <- paste0(protection.type,' protected individuals')}
+mean_nprot <- mean_nprot[,match(pMPAsizes,MPAsizes)]
+
+if(response2 == 'relative'){
+  mean_nprot <- mean_nprot/rowMaxs(mean_nprot,na.rm = TRUE)*100
+  ylabel <- paste0(protection.type, ' protected individuals (% max density)')}
+
+xlims <- c(10,100)
+
+for(xl in 1:length(xlims)){
+
+  xlim <- xlims[xl]
+  ylim <- max(mean_nprot[,3:max(which(pMPAsizes<=xlim*1000))],na.rm = TRUE)
+
+  tiff(paste0(scenario.results.folder, scenario.name,'_',protection.type,'_protected_individuals_',xlim,'km.tiff'), units="cm", width=18, height=12, res=res)
+  
+    par(mar=c(5.1, 4.1, 4.1, 12.1)) # this is usually the default
+    
+    plot(t(pMPAsizes/1000),mean_nprot[1,],type='l',xlim = c(0,xlim),ylim = c(0,ylim),
+         xlab = "MPA size (km)", ylab = ylabel,
+         lty=ltys[s],col=cols[s],lwd=lwd)
+    axis(side = 1, at = seq(0,xlim,xlim/10))
+    
+    # add effective area
+    #polygon(c(min.effective.size,min.effective.size,max.effective.size,max.effective.size),c(0,1,1,0),col='light green',border="light green")
+    
+    for (s in 1:nspecies) {
+      lines(t(pMPAsizes/1000),mean_nprot[s,],lty=ltys[s],col=cols[s],lwd=lwd)
+    }
+    #abline(v=min.effective.size,lty=1,lw=2,col='red')
+    #abline(v=max.effective.size,lty=1,lw=2,col='red')
+    
+    #crit.species <- species.names[which(mean_prot[,4]<0.5)]
+    #text(8,0.4,crit.species[1])
+    #text(8,0.3,crit.species[2])
+    
+    # add legend
+    par(xpd=TRUE)
+    legend("topright", inset=c(-0.6,0), legend=str_replace_all(species.names.ordered,'_',' '), 
+           lty=ltys[1:nspecies],col=cols[1:nspecies],lwd=2) #, title="Group")
+  
+  dev.off()
+  par(xpd=FALSE)
+
+}
+
+
+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+# Plot number of protected individuals ####
+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+# specify effective range
+#min.effective.size <- MPAsizes[min(which(colMeans(mean_prot)>0.1))]/1000
+#max.effective.size <- MPAsizes[min(which(colMeans(mean_prot)>=0.5))]/1000
+fmortplot <- c(0.05,0.10,0.20,0.50)
+response = 'Number' # 'Density' or 'Number'
+response2 <- 'Absolute' # "Relative" or 'Absolute'
+pMPAsizes <- MPAsizes[MPAsizes!=1] # exclude MPA size of 1 m
+xlims <- c(10,100)
+
+fmortcols <- match(fmortplot,(names(returndat[[1]]$mean_protected_individuals)))
+
+for(fp in 1:length(fmortplot)){
+  
+  mean_nprot <- matrix(rep(NA,length(mean_nfull)),dim(mean_nfull)) #array(NA,c(dim(mean_nfull),length(fmortcols)))
+  median_nprot <- mean_nprot
+  sd_nprot <- mean_nprot
+  
+  for (s in 1:nspecies) {
+    mean_nprot[s,] <- returndat[[s]]$mean_protected_individuals[,fmortcols[fp]]
+    median_nprot[s,] <- returndat[[s]]$median_protected_individuals[,fmortcols[fp]]
+    sd_nprot[s,] <- returndat[[s]]$sd_protected_individuals[,fmortcols[fp]]
+  }
+  #mean_nport <- median_nprot
+
+  #if(protection.type=='Fully'){mean_nprot <- mean_nfull
+  #}else{mean_nprot <- mean_npart}
+  
+  # individuals per 100 m2
+  if(response == 'Density'){
+    mean_nprot <- mean_nprot/t(matrix(rep(MPAsizes,nspecies),length(MPAsizes),nspecies))*100
+    ylabel <- paste0('Protected individuals (/100 m^2)')
+  } else {ylabel <- paste0('Protected individuals')}
+  mean_nprot <- mean_nprot[,match(pMPAsizes,MPAsizes)]
+  
+  if(response2 == 'Relative'){
+    mean_nprot <- mean_nprot/rowMaxs(mean_nprot,na.rm = TRUE)*100
+    ylabel <- paste0('Protected individuals (% max density)')}
+  
+  
+  for(xl in 1:length(xlims)){
+    
+    xlim <- xlims[xl]
+    ylim <- max(mean_nprot[,3:max(which(pMPAsizes<=xlim*1000))],na.rm = TRUE)
+    
+    tiff(paste0(scenario.results.folder, scenario.name,'_',
+                'Protected_individuals_','F',fmortplot[fp]*100,'_',xlim,'km.tiff'), units="cm", width=18, height=12, res=res)
+    
+    par(mar=c(5.1, 4.1, 4.1, 12.1)) # this is usually the default
+    
+    plot(t(pMPAsizes/1000),mean_nprot[1,],type='l',xlim = c(0,xlim),ylim = c(0,ylim),
+         xlab = "MPA size (km)", ylab = ylabel,
+         lty=ltys[s],col=cols[s],lwd=lwd)
+    axis(side = 1, at = seq(0,xlim,xlim/10))
+    
+    # add effective area
+    #polygon(c(min.effective.size,min.effective.size,max.effective.size,max.effective.size),c(0,1,1,0),col='light green',border="light green")
+    
+    for (s in 1:nspecies) {
+      lines(t(pMPAsizes/1000),mean_nprot[s,],lty=ltys[s],col=cols[s],lwd=lwd)
+    }
+    #abline(v=min.effective.size,lty=1,lw=2,col='red')
+    #abline(v=max.effective.size,lty=1,lw=2,col='red')
+    
+    #crit.species <- species.names[which(mean_prot[,4]<0.5)]
+    #text(8,0.4,crit.species[1])
+    #text(8,0.3,crit.species[2])
+    
+    # add legend
+    par(xpd=TRUE)
+    legend("topright", inset=c(-0.6,0), legend=str_replace_all(species.names.ordered,'_',' '), 
+           lty=ltys[1:nspecies],col=cols[1:nspecies],lwd=2) #, title="Group")
+    
+    dev.off()
+    par(xpd=FALSE)
+    
+  } # MPA size limits
+
+} # mortality levels
