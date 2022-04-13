@@ -17,7 +17,7 @@ library(ggpubr)
 ## Get the tag files ready and run the QC -------------
 
 # Location where the raw acoustic telemetry and Bruv data are stored
-datafolder <- "/Users/uqrdwye2/Dropbox/shark_mpa_model_v400/SA/DEW Marine Parks project/"
+datafolder <- "/Users/rdwyer2/Dropbox/shark_mpa_model_v400/SA/DEW Marine Parks project/"
 
 #Harlequin fish
 sp_det <- paste0(datafolder,"Harlequin fish/VUE_Export for Harlequin fish_All data.csv")

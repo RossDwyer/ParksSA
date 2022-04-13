@@ -15,7 +15,7 @@ library(ggpubr)
 ## Get the tag files ready and run the QC -------------
 
 # Location where the raw acoustic telemetry and Bruv data are stored
-datafolder <- "/Users/uqrdwye2/Dropbox/shark_mpa_model_v400/SA/DEW Marine Parks project/"
+datafolder <- "/Users/rdwyer2/Dropbox/shark_mpa_model_v400/SA/DEW Marine Parks project/"
 
 #Eagle Rays
 sp_det1 <- paste0(datafolder,"Southern eagle ray/Coffin Bay VUE export 2019.csv")
@@ -82,7 +82,12 @@ d.dplyr_Hor <- sp_det_dat_Hor %>%
          detection_datetime,station_name,installation_name,
          receiver_deployment_latitude,receiver_deployment_longitude)
 
-d.dplyr <- rbind(d.dplyr_Hor,d.dplyr_Cof)
+d.dplyr <- rbind(d.dplyr_Hor,d.dplyr_Cof) %>%
+  left_join(sp_tagmet_dat) %>% # Join to extract species and common name
+  dplyr::select(species_common_name,species_scientific_name,
+                transmitter_serial_number,detection_datetime,station_name,
+                receiver_deployment_longitude,receiver_deployment_latitude) %>%
+  dplyr::rename(transmitter_id=transmitter_serial_number) 
 
 # Add time catagories to location summary
 location_summary <-  d.dplyr %>%

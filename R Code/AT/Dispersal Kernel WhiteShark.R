@@ -11,53 +11,58 @@ library(remora)
 library(sf)
 library(sp)
 library(ggpubr)
-#source("R/2018-10-15_displot.R")
 
 ## Get the tag files ready and run the QC -------------
 
 # Location where the raw acoustic telemetry and Bruv data are stored
-datafolder <- "/Users/uqrdwye2/Dropbox/shark_mpa_model_v400/SA/DEW Marine Parks project/"
+datafolder <- "/Users/rdwyer2/Dropbox/shark_mpa_model_v400/SA/DEW Marine Parks project/"
 
 #White Sharks
-sp_det <- paste0(datafolder,"White sharks/total_detections.csv")
-#sp_receivermet <- paste0(datafolder,"Snapper/IMOS_receiver_deployment_metadata.csv")
-sp_tagmet <- paste0(datafolder,"Snapper/whiteshark_transmitter_codes.csv") # duplicate sensor tags (some) need to combine. Filter to Gulf stvincent - ignore NSW DPI and Vic
-#sp_meas <- paste0(datafolder,"Snapper/IMOS_animal_measurements.csv")
+sp_det <- paste0(datafolder,"White sharks/Total_detections.csv")
+sp_tagmet <- paste0(datafolder,"White sharks/whiteshark_transmitter_codes.csv") # duplicate sensor tags (some) need to combine. Filter to Gulf stvincent - ignore NSW DPI and Vic
 
-## specify files to QC - use supplied example .csv data
 sp_files <- list(det = sp_det,
-                 #rmeta = sp_receivermet,
                  tmeta = sp_tagmet)
-                 #meas = sp_meas
 
 ## Get the data ready for generating temporal dispersal metrics --------------
 
 # Read in the detection dataset
-#qc.out <- readRDS("Data/snapper_detQC.RDS") # Load detection data
-d.qc <- grabQC(qc.out, what = "dQC") # Grab QC detection-only data
+sp_det_dat <- read.csv(sp_files$det) %>% 
+  mutate(Date.and.Time..UTC.=as.POSIXct(Timestamp,tz="UTC")) %>%
+  select(Transmitter,Date.and.Time..UTC.,Latitude,Longitude,Station.Name)
 
-# As Snapper have multiple locations where tagged, lets make sure we only use unique tags from SA  
-d.dplyr <- d.qc %>% 
-  filter(tagging_project_name %in% "Gulf St Vincent monitoring") %>%
-  dplyr::select(-transmitter_id) # Remove transmitter_id as we'll be using unique tag_ids as some (dual) sensor tags
+# Extract only the variables we are interested renaming them to remora format
+d.dplyr <- sp_det_dat %>% 
+  rename(transmitter_id=Transmitter,
+         detection_datetime=Date.and.Time..UTC.) %>%
+  mutate(station_name = Station.Name,
+         receiver_deployment_longitude = Longitude,
+         receiver_deployment_latitude = Latitude) %>%
+  mutate(species_common_name = "White Shark",  # Attach species and common name
+         species_scientific_name = "Carcharodon carcharias") %>%
+  select(species_common_name,species_scientific_name,
+         transmitter_id,detection_datetime,station_name,
+         receiver_deployment_longitude,receiver_deployment_latitude)
+
+# Remove the SARDI tags
+'%!in%' <- function(x,y)!('%in%'(x,y)) # Operator to negate vector of tag ids
+sp_tag_dat <- read.csv(sp_files$tmeta)
+d.dplyr_id <- d.dplyr %>% filter(transmitter_id %!in% sp_tag_dat$transmitter_id)
 
 # Add time catagories to location summary
-location_summary <-  d.dplyr %>%
-  mutate(transmitter_id = tag_id, # ensures the below code is compatible with using a unique tag_id (not the duplicate ping and sensor tag ids)
-         species_scientific_name = as.factor(species_scientific_name),
+location_summary <-  d.dplyr_id %>%
+  mutate(species_scientific_name = as.factor(species_scientific_name),
          species_common_name = as.factor(species_common_name),
          Day = date(detection_datetime),
          Week = format(Day, "%Y-%W"),
          Month = format(Day, "%Y-%m")) %>%
   dplyr::select(transmitter_id,
-                tagging_project_name,
                 species_common_name,species_scientific_name,
                 detection_datetime,
-                installation_name,station_name,
+                station_name,
                 receiver_deployment_longitude, 
                 receiver_deployment_latitude,
                 Day,Week,Month)
-
 
 ### Days ------------
 # Unite columns to get unique detections at receiver stations within a specified time interval
@@ -129,19 +134,19 @@ dispersal_summary_month <- location_summary_month %>%
   separate(z, c("species_common_name", "transmitter_id", "Month"), sep = "([._:])")
 
 # Save the file as an RDS object
-Dispersal_Timescales_Snapper <- list(Daily=dispersal_summary_day,
+Dispersal_Timescales_WhiteShark <- list(Daily=dispersal_summary_day,
                                      Weekly=dispersal_summary_week,
                                      Monthly=dispersal_summary_month)
-saveRDS(Dispersal_Timescales_Snapper, file = "Data/Dispersal_Timescales_Snapper.RDS") # Save to github
+saveRDS(Dispersal_Timescales_WhiteShark, file = "Data/Dispersal_Timescales_WhiteShark.RDS") # Save to github
 
 ##############################################
 
 
 # Compute a histogram of distance per month
-disp.hist <- Dispersal_Timescales_Snapper$Monthly %>%
+disp.hist <- Dispersal_Timescales_WhiteShark$Weekly %>%
   ggplot(aes(maxDistkm)) + geom_histogram() +theme_bw()
 # Compute a histogram of num receiver stations
-stat.hist <- Dispersal_Timescales_Snapper$Monthly %>%
+stat.hist <- Dispersal_Timescales_WhiteShark$Weekly %>%
   ggplot(aes(n_stations)) + geom_histogram() +theme_bw()
 ggarrange(disp.hist,stat.hist)
 # 

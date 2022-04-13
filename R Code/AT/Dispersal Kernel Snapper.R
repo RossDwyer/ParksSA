@@ -16,7 +16,7 @@ library(ggpubr)
 ## Get the tag files ready and run the QC -------------
 
 # Location where the raw acoustic telemetry and Bruv data are stored
-datafolder <- "/Users/uqrdwye2/Dropbox/shark_mpa_model_v400/SA/DEW Marine Parks project/"
+datafolder <- "/Users/rdwyer2/Dropbox/shark_mpa_model_v400/SA/DEW Marine Parks project/"
 
 #Snapper
 sp_det <- paste0(datafolder,"Snapper/IMOS_detections.csv")
@@ -35,7 +35,7 @@ qc.out <- runQC(sp_files) # Run remora::runQC() to combine fields
 ## Get the data ready for generating temporal dispersal metrics --------------
 
 # Read in the detection dataset
-#qc.out <- readRDS("Data/snapper_detQC.RDS") # Load detection data
+qc.out <- readRDS("Data/snapper_detQC.RDS") # Load detection data
 d.qc <- grabQC(qc.out, what = "dQC") # Grab QC detection-only data
 
 # As Snapper have multiple locations where tagged, lets make sure we only use unique tags from SA  

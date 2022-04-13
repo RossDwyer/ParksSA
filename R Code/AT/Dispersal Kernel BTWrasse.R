@@ -16,7 +16,7 @@ library(dplyr)
 ## Get the tag files ready and run the QC -------------
 
 # Location where the raw acoustic telemetry and Bruv data are stored
-datafolder <- "/Users/uqrdwye2/Dropbox/shark_mpa_model_v400/SA/DEW Marine Parks project/"
+datafolder <- "/Users/rdwyer2/Dropbox/shark_mpa_model_v400/SA/DEW Marine Parks project/"
 
 #Blue Groper
 sp_det <- paste0(datafolder,"Western blue groper and bluethroat wrasse/VUE_Export_WBG _ BTW data.csv")

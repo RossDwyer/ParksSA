@@ -15,7 +15,7 @@ library(ggpubr)
 ## Get the tag files ready and run the QC -------------
 
 # Location where the raw acoustic telemetry and Bruv data are stored
-datafolder <- "/Users/uqrdwye2/Dropbox/shark_mpa_model_v400/SA/DEW Marine Parks project/"
+datafolder <- "/Users/rdwyer2/Dropbox/shark_mpa_model_v400/SA/DEW Marine Parks project/"
 
 #Trevally
 sp_det <- paste0(datafolder,"Trevally/Trevally_RAW_2019_2021.csv")
@@ -39,14 +39,14 @@ sp_files <- list(det = sp_det,
 
 sp_det_dat <- read.csv(sp_files$det) %>% #UTC sentence case LonLat
   mutate(Date.and.Time..UTC.=as.POSIXct(Date.and.Time..UTC.,tz="UTC",format="%d/%m/%y")) %>%
-  select(Transmitter,Date.and.Time..UTC.,Latitude,Longitude,Station.Name)
+  select(Transmitter.Serial,Date.and.Time..UTC.,Latitude,Longitude,Station.Name)
 
 #sp_receivermet_dat <- read.csv(sp_files$rmeta)
 sp_tagmet_dat <-  read.csv(sp_files$tmeta)
 
 # Extract only the variables we are interested renaming them to remora format
 d.dplyr <- sp_det_dat %>% 
-  rename(transmitter_id=Transmitter,
+  rename(transmitter_id=Transmitter.Serial,
          detection_datetime=Date.and.Time..UTC.) %>%
   mutate(station_name = Station.Name,
          receiver_deployment_longitude = Longitude,
@@ -152,6 +152,10 @@ saveRDS(Dispersal_Timescales_Trevally, file = "Data/Dispersal_Timescales_Trevall
 
 ##############################################
 
+Dispersal_Timescales_Trevally <- readRDS(file = "Data/Dispersal_Timescales_Trevally.RDS") # Save to github
+
+
+View(Dispersal_Timescales_Trevally$Weekly)
 
 # Compute a histogram of distance per month
 disp.hist <- Dispersal_Timescales_Trevally$Weekly %>%

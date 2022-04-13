@@ -15,7 +15,7 @@ library(ggpubr)
 ## Get the tag files ready and run the QC -------------
 
 # Location where the raw acoustic telemetry and Bruv data are stored
-datafolder <- "/Users/uqrdwye2/Dropbox/shark_mpa_model_v400/SA/DEW Marine Parks project/"
+datafolder <- "/Users/rdwyer2/Dropbox/shark_mpa_model_v400/SA/DEW Marine Parks project/"
 
 #Blue Groper
 sp_det <- paste0(datafolder,"Western blue groper and bluethroat wrasse/VUE_Export_WBG _ BTW data.csv")
@@ -28,15 +28,11 @@ sp_files <- list(det = sp_det,
                  rmeta = sp_receivermet,
                  tmeta = sp_tagmet,
                  meas = sp_meas)
-#qc.out <- runQC(sp_files) # Run remora::runQC() to combine fields 
-#saveRDS(qc.out, file = "Data/snapper_detQC.RDS") # Save to github
+
 
 ## Get the data ready for generating temporal dispersal metrics --------------
 
 # Read in the detection dataset
-#qc.out <- readRDS("Data/snapper_detQC.RDS") # Load detection data
-#d.qc <- grabQC(qc.out, what = "dQC") # Grab QC detection-only data
-
 sp_det_dat0 <- read.csv(sp_files$det)
 sp_receivermet_dat <- read.csv(sp_files$rmeta)
 sp_tagmet_dat <-  read.csv(sp_files$tmeta)

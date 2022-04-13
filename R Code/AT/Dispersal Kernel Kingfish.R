@@ -15,7 +15,7 @@ library(ggpubr)
 ## Get the tag files ready and run the QC -------------
 
 # Location where the raw acoustic telemetry and Bruv data are stored
-datafolder <- "/Users/uqrdwye2/Dropbox/shark_mpa_model_v400/SA/DEW Marine Parks project/"
+datafolder <- "/Users/rdwyer2/Dropbox/shark_mpa_model_v400/SA/DEW Marine Parks project/"
 
 #Kingfish
 sp_det1 <- paste0(datafolder,"Kingfish/Detections/Kingfish_CoffinBay_2019.csv")
@@ -47,23 +47,23 @@ sp_files <- list(det1 = sp_det1,
 #d.qc <- grabQC(qc.out, what = "dQC") # Grab QC detection-only data
 sp_det_dat1 <- read.csv(sp_files$det1) %>% #UTC sentence case LonLat
   mutate(Date.and.Time..UTC.=ymd_hms(Date.and.Time..UTC.,tz="UTC")) %>%
-  dplyr::select(Transmitter,Date.and.Time..UTC.,Latitude,Longitude)
+  dplyr::select(Transmitter.Serial,Date.and.Time..UTC.,Latitude,Longitude)
 sp_det_dat2 <- read.csv(sp_files$det2) %>% #UTC sentence case LonLat
   mutate(Date.and.Time..UTC.=ymd_hms(Date.and.Time..UTC.,tz="UTC")) %>%
-  dplyr::select(Transmitter,Date.and.Time..UTC.,Latitude,Longitude)
+  dplyr::select(Transmitter.Serial,Date.and.Time..UTC.,Latitude,Longitude)
 sp_det_dat3 <- read.csv(sp_files$det3) %>% #Local lower case lonlat
   dplyr::rename(Longitude = longitude,
          Latitude = latitude) %>%
   mutate(Date.and.Time..local.=dmy_hms(Date.and.Time..local.,tz="Australia/Adelaide"),
          Date.and.Time..UTC. = with_tz(Date.and.Time..local., "UTC")) %>%
-  dplyr::select(Transmitter,Date.and.Time..UTC.,Latitude,Longitude)
+  dplyr::select(Transmitter.Serial,Date.and.Time..UTC.,Latitude,Longitude)
 sp_det_dat4 <- read.csv(sp_files$det4) %>% #UTC sentence case LonLat
-  mutate(Date.and.Time..UTC.=ymd_hms(Date.and.Time..UTC.,tz="UTC"))%>%
-  dplyr::select(Transmitter,Date.and.Time..UTC.,Latitude,Longitude)
+  mutate(Date.and.Time..UTC.=ymd_hms(Date.and.Time..UTC.,tz="UTC")) %>%
+  dplyr::select(Transmitter.Serial,Date.and.Time..UTC.,Latitude,Longitude)
 sp_det_dat5 <- read.csv(sp_files$det5) %>% #Local sentence case LonLat
   mutate(Date.and.Time..Local.=dmy_hms(Date.and.Time..Local.,tz="Australia/Adelaide"),
-         Date.and.Time..UTC. = with_tz(Date.and.Time..Local., "UTC"))%>%
-  dplyr::select(Transmitter,Date.and.Time..UTC.,Latitude,Longitude)
+         Date.and.Time..UTC. = with_tz(Date.and.Time..Local., "UTC")) %>%
+  dplyr::select(Transmitter.Serial,Date.and.Time..UTC.,Latitude,Longitude)
 ## Combine detection datasets
 sp_det_dat <- rbind(sp_det_dat1,sp_det_dat2,sp_det_dat3,sp_det_dat4,sp_det_dat5)
 
@@ -72,15 +72,16 @@ sp_tagmet_dat <-  read.csv(sp_files$tmeta)
 
 # Extract only the variables we are interested renaming them to remora format
 d.dplyr <- sp_det_dat %>% 
-  dplyr::rename(transmitter_id=Transmitter,
+  dplyr::rename(transmitter_serial_number=Transmitter.Serial,
          detection_datetime=Date.and.Time..UTC.) %>%
   mutate(station_name="Unknown",
          receiver_deployment_longitude = Longitude,
          receiver_deployment_latitude = Latitude) %>%
   left_join(sp_tagmet_dat) %>% # Join to extract species and common name
   dplyr::select(species_common_name,species_scientific_name,
-         transmitter_id,detection_datetime,station_name,
-         receiver_deployment_longitude,receiver_deployment_latitude)
+                transmitter_serial_number,detection_datetime,station_name,
+         receiver_deployment_longitude,receiver_deployment_latitude) %>%
+  dplyr::rename(transmitter_id=transmitter_serial_number) #Change serial number name back to tag id name for comparability
 
 # Add time catagories to location summary
 location_summary <-  d.dplyr %>%
