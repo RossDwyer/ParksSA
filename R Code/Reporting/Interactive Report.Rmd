@@ -11,10 +11,15 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Introduction
 
-This is an R Markdown document that visualises the conservation benefits of no take protected areas to 10 teleost and elasmobranch species based on individual movements and relative abundances. The MPA size decision support model was originally developed by Dr Nils Krueck (UTAS) and published here - <https://conbio.onlinelibrary.wiley.com/doi/10.1111/conl.12415>. Dr Ross Dwyer (USC) and Dr Nils Krueck then adapted this modelling framework to allow telemetry and BRUV datasets to be included as model inputs. The original paper was published here - <https://www.sciencedirect.com/science/article/pii/S0960982219316008?via%3Dihub>. 
+This is an R Markdown document that visualises the conservation benefits of no take protected areas to 10 teleost and elasmobranch species based on individual movements and relative abundances. The MPA size decision support model was originally developed by Dr Nils Krueck (UTAS) and published here - <https://conbio.onlinelibrary.wiley.com/doi/10.1111/conl.12415>. Dr Ross Dwyer (USC) and Dr Nils Krueck adapted this modelling framework to allow telemetry and BRUV datasets to be included as model inputs. The original paper was published here - <https://www.sciencedirect.com/science/article/pii/S0960982219316008?via%3Dihub>. 
 
-In this report, we apply this modelling framework to 6 teleost, three shark and one ray species to investigate the conservation effectiveness of existing no take reserves in South Australia using the following metrics. Project is a collaboration with Prof Charlie Huveneers (Flinders) and South Australia Government's Department for Environment and Water.
+Here, we apply this modelling framework to 6 teleost (Western Blue Groper, Bluethroat Wrasse, Harlequinn, Yellowtail Kingfish, Snapper, Silver Trevally), three shark((Bronze Whaler, Dusky Shark, White Shark)) and one ray species (Southern Eagle Ray) to investigate the conservation effectiveness of existing no take reserves in South Australia for these species. ffectiveness is measured by: 
 
+* estimated proportion of activity within an MPA
+* fishing mortality offsets considering variable degrees of total fishing morality
+* the total number of individuals protected over their lifetime
+
+This project is a collaboration with Prof Charlie Huveneers (Flinders) and South Australia Government's Department for Environment and Water.
 
 ```{r, echo=FALSE,results='hide', message=FALSE, warning=FALSE}
 # 1. Load the packages -----------
@@ -33,7 +38,6 @@ library(dplyr)
 library(matrixStats)
 ```
 
-
 ```{r, echo=FALSE}
 # Full address of the R Studio Project where data and R code are stored (needed for reproducing markdown report)
 maindir <- "/Users/rdwyer2/GitHub/ParksSA/" 
@@ -41,7 +45,7 @@ maindir <- "/Users/rdwyer2/GitHub/ParksSA/"
 First we set the model parameters
 
 ```{r, echo=FALSE}
-# Set file locations
+# Set file locations -------
 modelid <- 100 # specify model version / id
 datadir <- paste0(maindir, 'Data/') 
 results.folder <- 'Results/'
@@ -50,7 +54,7 @@ resultsdir <- paste0(maindir,results.folder,modelversion,'/') # Where the Result
 ```
 
 ```{r}
-# Set model parameters
+# Set model parameters -------
 case.study.region <- "SA_idealized"
 resolution <- 100
 dispersal.period <- "Weekly"
@@ -59,6 +63,7 @@ rBRUVcatchment <- 100
 ```
 
 ```{r, echo=FALSE}
+# This is where we set which model we are working with (pulls in the correct returndat folder)
 scenario.name <- paste0(case.study.region,'_Res', resolution,'_',dispersal.period,'_AgeAt',age,'_rBRUV',rBRUVcatchment)
 
 returndat <- readRDS(paste0(resultsdir,modelversion,'_',scenario.name,'_returndat.RDS'))
@@ -77,7 +82,7 @@ ngroups <- xtabs(~species.groups)
 
 returndat <- returndat[species.names.ordered]
 
-#SpeciesNames <- str_replace_all(species.names.ordered,'_',' ') # Formatted species names
+SpeciesNames <- str_replace_all(species.names.ordered,'_',' ') # Formatted species names
 
 ```
 
@@ -169,7 +174,7 @@ plotProbSurv(F1="0.5")
 # Calculate number of protected individuals {.tabset}
 
 ## F = 0.05
-```{r}
+```{r, echo=FALSE}
 plotNoInd("0.05")
 ```
 
@@ -189,9 +194,9 @@ plotNoInd(F1="0.5")
 ```
 
 
-# Maping South Australia's protected areas {.tabset}
+# Mapping South Australia's protected areas {.tabset}
 
-This Section displays an interactive map of IUCN Cat II reserves in South Australian Waters. The dataset was sourced from the Australian Government Collaborative Australian Protected Area Database (CAPAD 2020) <https://www.awe.gov.au/agriculture-land/land/nrs/science/capad>. Areas are coloured according to (a) maximum reserve width or (b) the minimum distance between Cat II reserves. 
+This section displays an interactive map of IUCN Cat II reserves in South Australian Waters. The dataset was sourced from the Australian Government Collaborative Australian Protected Area Database (CAPAD 2020) <https://www.awe.gov.au/agriculture-land/land/nrs/science/capad>. Areas are coloured according to (a) maximum reserve width or (b) the minimum distance between Cat II reserves. 
 
 ## Max width 
 ```{r, echo=FALSE}

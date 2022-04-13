@@ -7,8 +7,8 @@
 
 library(plotly)
 
-returndat <- readRDS(paste0(resultsdir,modelversion,'_',scenario.name,'_returndat.RDS'))
-SpeciesNames <- str_replace_all(species.names.ordered,'_',' ') # Formatted species names
+#returndat <- readRDS(paste0(resultsdir,modelversion,'_',scenario.name,'_returndat.RDS'))
+#SpeciesNames <- str_replace_all(species.names.ordered,'_',' ') # Formatted species names
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 # Calculate MPA size to achieve certain protection levels ##### ----
@@ -26,24 +26,24 @@ plotPropTim <- function(sxaxis=100,sd=FALSE){
                  name = str_replace_all(names(returndat)[1],'_',' '),
                  type = 'scatter', mode = 'lines+markers')
   fig <- fig %>% add_trace(y = ~round(returndat[[2]]$statstable$mean_prot,2), 
-                           name = str_replace_all(names(returndat)[2],'_',' '),
-                           line = list(dash = 'dash')) 
+                           name = str_replace_all(names(returndat)[2],'_',' ')) 
   fig <- fig %>% add_trace(y = ~round(returndat[[3]]$statstable$mean_prot,2), 
                            name = str_replace_all(names(returndat)[3],'_',' '))
   fig <- fig %>% add_trace(y = ~round(returndat[[4]]$statstable$mean_prot,2), 
-                           name = str_replace_all(names(returndat)[4],'_',' '),
-                           line = list(dash = 'dash')) 
+                           name = str_replace_all(names(returndat)[4],'_',' ')) 
   fig <- fig %>% add_trace(y = ~round(returndat[[5]]$statstable$mean_prot,2), 
-                           name = str_replace_all(names(returndat)[5],'_',' '),
-                           line = list(dash = 'dot'))
+                           name = str_replace_all(names(returndat)[5],'_',' '))
   fig <- fig %>% add_trace(y = ~round(returndat[[6]]$statstable$mean_prot,2), 
                            name = str_replace_all(names(returndat)[6],'_',' '))
   fig <- fig %>% add_trace(y = ~round(returndat[[7]]$statstable$mean_prot,2), 
-                           name = str_replace_all(names(returndat)[7],'_',' '))
+                           name = str_replace_all(names(returndat)[7],'_',' '),
+                           line = list(dash = 'dot')) 
   fig <- fig %>% add_trace(y = ~round(returndat[[8]]$statstable$mean_prot,2), 
-                           name = str_replace_all(names(returndat)[8],'_',' ')) 
+                           name = str_replace_all(names(returndat)[8],'_',' '),
+                           line = list(dash = 'dash')) 
   fig <- fig %>% add_trace(y = ~round(returndat[[9]]$statstable$mean_prot,2), 
-                           name = str_replace_all(names(returndat)[9],'_',' ')) 
+                           name = str_replace_all(names(returndat)[9],'_',' '),
+                           line = list(dash = 'dash')) 
   fig <- fig %>% add_trace(y = ~round(returndat[[10]]$statstable$mean_prot,2), 
                            name = str_replace_all(names(returndat)[10],'_',' '),
                            line = list(dash = 'dash')) 
@@ -56,30 +56,30 @@ plotPropTim <- function(sxaxis=100,sd=FALSE){
                    error_y =list(array=round(returndat[[1]]$statstable$sd_prot,2)))
     fig <- fig %>% add_trace(y = ~round(returndat[[2]]$statstable$mean_prot,2), 
                              name = str_replace_all(names(returndat)[2],'_',' '),
-                             line = list(dash = 'dash'),
                              error_y =list(array=round(returndat[[2]]$statstable$sd_prot,2))) 
     fig <- fig %>% add_trace(y = ~round(returndat[[3]]$statstable$mean_prot,2), 
                              name = str_replace_all(names(returndat)[3],'_',' '),
                              error_y =list(array=round(returndat[[3]]$statstable$sd_prot,2)))  
     fig <- fig %>% add_trace(y = ~round(returndat[[4]]$statstable$mean_prot,2), 
                              name = str_replace_all(names(returndat)[4],'_',' '),
-                             line = list(dash = 'dash'),
                              error_y =list(array=round(returndat[[4]]$statstable$sd_prot,2)))  
     fig <- fig %>% add_trace(y = ~round(returndat[[5]]$statstable$mean_prot,2), 
                              name = str_replace_all(names(returndat)[5],'_',' '),
-                             line = list(dash = 'dot'),
                              error_y =list(array=round(returndat[[5]]$statstable$sd_prot,2))) 
     fig <- fig %>% add_trace(y = ~round(returndat[[6]]$statstable$mean_prot,2), 
                              name = str_replace_all(names(returndat)[6],'_',' '),
                              error_y =list(array=round(returndat[[6]]$statstable$sd_prot,2))) 
     fig <- fig %>% add_trace(y = ~round(returndat[[7]]$statstable$mean_prot,2), 
                              name = str_replace_all(names(returndat)[7],'_',' '),
+                             line = list(dash = 'dot'),
                              error_y =list(array=round(returndat[[7]]$statstable$sd_prot,2))) 
     fig <- fig %>% add_trace(y = ~round(returndat[[8]]$statstable$mean_prot,2), 
                              name = str_replace_all(names(returndat)[8],'_',' '),
+                             line = list(dash = 'dash'),
                              error_y =list(array=round(returndat[[8]]$statstable$sd_prot,2))) 
     fig <- fig %>% add_trace(y = ~round(returndat[[9]]$statstable$mean_prot,2), 
                              name = str_replace_all(names(returndat)[9],'_',' '),
+                             line = list(dash = 'dash'),
                              error_y =list(array=round(returndat[[9]]$statstable$sd_prot,2))) 
     fig <- fig %>% add_trace(y = ~round(returndat[[10]]$statstable$mean_prot,2), 
                              name = str_replace_all(names(returndat)[10],'_',' '),
@@ -109,24 +109,24 @@ plotLifMort <- function(F1="0.05",sd=FALSE){
                   name = str_replace_all(names(returndat)[1],'_',' '),
                   type = 'scatter', mode = 'lines+markers')
   fig2 <- fig2 %>% add_trace(y = ~unlist(round(returndat[[2]]$mean_Fmortality[i]* 100,2)), 
-                             name = str_replace_all(names(returndat)[2],'_',' '),
-                             line = list(dash = 'dash')) 
+                             name = str_replace_all(names(returndat)[2],'_',' '))
   fig2 <- fig2 %>% add_trace(y = ~unlist(round(returndat[[3]]$mean_Fmortality[i]* 100,3)), 
                              name = str_replace_all(names(returndat)[3],'_',' ')) 
   fig2 <- fig2 %>% add_trace(y = ~unlist(round(returndat[[4]]$mean_Fmortality[i]* 100,4)), 
-                             name = str_replace_all(names(returndat)[4],'_',' '),
-                             line = list(dash = 'dash')) 
+                             name = str_replace_all(names(returndat)[4],'_',' '))
   fig2 <- fig2 %>% add_trace(y = ~unlist(round(returndat[[5]]$mean_Fmortality[i]* 100,5)), 
-                             name = str_replace_all(names(returndat)[5],'_',' '),
-                             line = list(dash = 'dot'))
+                             name = str_replace_all(names(returndat)[5],'_',' '))
   fig2 <- fig2 %>% add_trace(y = ~unlist(round(returndat[[6]]$mean_Fmortality[i]* 100,6)), 
                              name = str_replace_all(names(returndat)[6],'_',' '))
   fig2 <- fig2 %>% add_trace(y = ~unlist(round(returndat[[7]]$mean_Fmortality[i]* 100,7)), 
-                             name = str_replace_all(names(returndat)[7],'_',' ')) 
+                             name = str_replace_all(names(returndat)[7],'_',' '),
+                             line = list(dash = 'dot'))  
   fig2 <- fig2 %>% add_trace(y = ~unlist(round(returndat[[8]]$mean_Fmortality[i]* 100,8)), 
-                             name = str_replace_all(names(returndat)[8],'_',' ')) 
+                             name = str_replace_all(names(returndat)[8],'_',' '),
+                             line = list(dash = 'dash')) 
   fig2 <- fig2 %>% add_trace(y = ~unlist(round(returndat[[9]]$mean_Fmortality[i]* 100,9)), 
-                             name = str_replace_all(names(returndat)[9],'_',' ')) 
+                             name = str_replace_all(names(returndat)[9],'_',' '),
+                             line = list(dash = 'dash'))  
   fig2 <- fig2 %>% add_trace(y = ~unlist(round(returndat[[10]]$mean_Fmortality[i]* 100,10)), 
                              name = str_replace_all(names(returndat)[10],'_',' '),
                              line = list(dash = 'dash')) 
@@ -139,30 +139,29 @@ plotLifMort <- function(F1="0.05",sd=FALSE){
                     error_y =list(array=unlist(round(returndat[[1]]$sd_Fmortality[i]* 100,2))))
     fig2 <- fig2 %>% add_trace(y = ~unlist(round(returndat[[2]]$mean_Fmortality[i]* 100,2)), 
                                name = str_replace_all(names(returndat)[2],'_',' '),
-                               line = list(dash = 'dash'), 
                                error_y =list(array=unlist(round(returndat[[2]]$sd_Fmortality[i]* 100,2)))) 
     fig2 <- fig2 %>% add_trace(y = ~unlist(round(returndat[[3]]$mean_Fmortality[i]* 100,3)), 
-                               name = str_replace_all(names(returndat)[3],'_',' '),
                                error_y =list(array=unlist(round(returndat[[3]]$sd_Fmortality[i]* 100,2)))) 
     fig2 <- fig2 %>% add_trace(y = ~unlist(round(returndat[[4]]$mean_Fmortality[i]* 100,4)), 
                                name = str_replace_all(names(returndat)[4],'_',' '),
-                               line = list(dash = 'dash'), 
                                error_y =list(array=unlist(round(returndat[[4]]$sd_Fmortality[i]* 100,2))))  
     fig2 <- fig2 %>% add_trace(y = ~unlist(round(returndat[[5]]$mean_Fmortality[i]* 100,5)), 
                                name = str_replace_all(names(returndat)[5],'_',' '),
-                               line = list(dash = 'dot'), 
                                error_y =list(array=unlist(round(returndat[[5]]$sd_Fmortality[i]* 100,2)))) 
     fig2 <- fig2 %>% add_trace(y = ~unlist(round(returndat[[6]]$mean_Fmortality[i]* 100,6)), 
                                name = str_replace_all(names(returndat)[6],'_',' '),
                                error_y =list(array=unlist(round(returndat[[6]]$sd_Fmortality[i]* 100,2)))) 
     fig2 <- fig2 %>% add_trace(y = ~unlist(round(returndat[[7]]$mean_Fmortality[i]* 100,7)), 
                                name = str_replace_all(names(returndat)[7],'_',' '),
+                               line = list(dash = 'dot'), 
                                error_y =list(array=unlist(round(returndat[[7]]$sd_Fmortality[i]* 100,2))))  
     fig2 <- fig2 %>% add_trace(y = ~unlist(round(returndat[[8]]$mean_Fmortality[i]* 100,8)), 
                                name = str_replace_all(names(returndat)[8],'_',' '),
+                               line = list(dash = 'dash'), 
                                error_y =list(array=unlist(round(returndat[[8]]$sd_Fmortality[i]* 100,2)))) 
     fig2 <- fig2 %>% add_trace(y = ~unlist(round(returndat[[9]]$mean_Fmortality[i]* 100,9)), 
                                name = str_replace_all(names(returndat)[9],'_',' '),
+                               line = list(dash = 'dash'), 
                                error_y =list(array=unlist(round(returndat[[9]]$sd_Fmortality[i]* 100,2)))) 
     fig2 <- fig2 %>% add_trace(y = ~unlist(round(returndat[[10]]$mean_Fmortality[i]* 100,10)), 
                                name = str_replace_all(names(returndat)[10],'_',' '),
@@ -192,24 +191,24 @@ plotMortOff <- function(F1="0.05"){
                   name = str_replace_all(names(returndat)[1],'_',' '),
                   type = 'scatter', mode = 'lines+markers')
   fig3 <- fig3 %>% add_trace(y = ~unlist(round(returndat[[2]]$mean_Foffset[i],2)), 
-                             name = str_replace_all(names(returndat)[2],'_',' '),
-                             line = list(dash = 'dash')) 
+                             name = str_replace_all(names(returndat)[2],'_',' ')) 
   fig3 <- fig3 %>% add_trace(y = ~unlist(round(returndat[[3]]$mean_Foffset[i],3)), 
                              name = str_replace_all(names(returndat)[3],'_',' '))
   fig3 <- fig3 %>% add_trace(y = ~unlist(round(returndat[[4]]$mean_Foffset[i],4)), 
-                             name = str_replace_all(names(returndat)[4],'_',' '),
-                             line = list(dash = 'dash')) 
+                             name = str_replace_all(names(returndat)[4],'_',' ')) 
   fig3 <- fig3 %>% add_trace(y = ~unlist(round(returndat[[5]]$mean_Foffset[i],5)), 
-                             name = str_replace_all(names(returndat)[5],'_',' '),
-                             line = list(dash = 'dot')) 
+                             name = str_replace_all(names(returndat)[5],'_',' ')) 
   fig3 <- fig3 %>% add_trace(y = ~unlist(round(returndat[[6]]$mean_Foffset[i],6)), 
                              name = str_replace_all(names(returndat)[6],'_',' ')) 
   fig3 <- fig3 %>% add_trace(y = ~unlist(round(returndat[[7]]$mean_Foffset[i],7)), 
-                             name = str_replace_all(names(returndat)[7],'_',' '))
+                             name = str_replace_all(names(returndat)[7],'_',' '),
+                             line = list(dash = 'dot'))
   fig3 <- fig3 %>% add_trace(y = ~unlist(round(returndat[[8]]$mean_Foffset[i],8)), 
-                             name = str_replace_all(names(returndat)[8],'_',' '))
+                             name = str_replace_all(names(returndat)[8],'_',' '),
+                             line = list(dash = 'dash')) 
   fig3 <- fig3 %>% add_trace(y = ~unlist(round(returndat[[9]]$mean_Foffset[i],9)), 
-                             name = str_replace_all(names(returndat)[9],'_',' '))
+                             name = str_replace_all(names(returndat)[9],'_',' '),
+                             line = list(dash = 'dash'))
   fig3 <- fig3 %>% add_trace(y = ~unlist(round(returndat[[10]]$mean_Foffset[i],10)), 
                              name = str_replace_all(names(returndat)[10],'_',' '),
                              line = list(dash = 'dash')) 
@@ -238,24 +237,24 @@ plotProbSurv <- function(F1="0.05"){
                   name = str_replace_all(names(returndat)[1],'_',' '), 
                   type = 'scatter', mode = 'lines+markers')
   fig4 <- fig4 %>% add_trace(y = ~unlist(round(returndat[[2]]$mean_survival_probability[i],2)), 
-                             name = str_replace_all(names(returndat)[2],'_',' '), 
-                             line = list(dash = 'dash')) 
+                             name = str_replace_all(names(returndat)[2],'_',' ')) 
   fig4 <- fig4 %>% add_trace(y = ~unlist(round(returndat[[3]]$mean_survival_probability[i],3)), 
                              name = str_replace_all(names(returndat)[3],'_',' ')) 
   fig4 <- fig4 %>% add_trace(y = ~unlist(round(returndat[[4]]$mean_survival_probability[i],4)), 
-                             name = str_replace_all(names(returndat)[4],'_',' '), 
-                             line = list(dash = 'dash')) 
+                             name = str_replace_all(names(returndat)[4],'_',' ')) 
   fig4 <- fig4 %>% add_trace(y = ~unlist(round(returndat[[5]]$mean_survival_probability[i],5)), 
-                             name = str_replace_all(names(returndat)[5],'_',' '), 
-                             line = list(dash = 'dot')) 
+                             name = str_replace_all(names(returndat)[5],'_',' ')) 
   fig4 <- fig4 %>% add_trace(y = ~unlist(round(returndat[[6]]$mean_survival_probability[i],6)), 
                              name = str_replace_all(names(returndat)[6],'_',' ')) 
   fig4 <- fig4 %>% add_trace(y = ~unlist(round(returndat[[7]]$mean_survival_probability[i],7)), 
-                             name = str_replace_all(names(returndat)[7],'_',' ')) 
+                             name = str_replace_all(names(returndat)[7],'_',' '),
+                             line = list(dash = 'dot')) 
   fig4 <- fig4 %>% add_trace(y = ~unlist(round(returndat[[8]]$mean_survival_probability[i],8)), 
-                             name = str_replace_all(names(returndat)[8],'_',' ')) 
+                             name = str_replace_all(names(returndat)[8],'_',' '),
+                             line = list(dash = 'dash')) 
   fig4 <- fig4 %>% add_trace(y = ~unlist(round(returndat[[9]]$mean_survival_probability[i],9)), 
-                             name = str_replace_all(names(returndat)[9],'_',' ')) 
+                             name = str_replace_all(names(returndat)[9],'_',' '),
+                             line = list(dash = 'dash')) 
   fig4 <- fig4 %>% add_trace(y = ~unlist(round(returndat[[10]]$mean_survival_probability[i],10)), 
                              name = str_replace_all(names(returndat)[10],'_',' '), 
                              line = list(dash = 'dash')) 
@@ -284,24 +283,24 @@ plotNoInd <- function(F1="0.05"){
                   name = str_replace_all(names(returndat)[4],'_',' '), 
                   type = 'scatter', mode = 'lines+markers')
   fig5 <- fig5 %>% add_trace(y = ~unlist(round(returndat[[2]]$mean_protected_individuals[i],0)), 
-                             name = str_replace_all(names(returndat)[2],'_',' '), 
-                             line = list(dash = 'dash')) 
+                             name = str_replace_all(names(returndat)[2],'_',' ')) 
   fig5 <- fig5 %>% add_trace(y = ~unlist(round(returndat[[3]]$mean_protected_individuals[i],0)), 
                              name = str_replace_all(names(returndat)[3],'_',' '))
   fig5 <- fig5 %>% add_trace(y = ~unlist(round(returndat[[4]]$mean_protected_individuals[i],0)), 
-                             name = str_replace_all(names(returndat)[4],'_',' '), 
-                             line = list(dash = 'dash')) 
+                             name = str_replace_all(names(returndat)[4],'_',' ')) 
   fig5 <- fig5 %>% add_trace(y = ~unlist(round(returndat[[5]]$mean_protected_individuals[i],0)), 
-                             name = str_replace_all(names(returndat)[5],'_',' '), 
-                             line = list(dash = 'dot')) 
+                             name = str_replace_all(names(returndat)[5],'_',' '))
   fig5 <- fig5 %>% add_trace(y = ~unlist(round(returndat[[6]]$mean_protected_individuals[i],0)), 
                              name = str_replace_all(names(returndat)[6],'_',' '))
   fig5 <- fig5 %>% add_trace(y = ~unlist(round(returndat[[7]]$mean_protected_individuals[i],0)), 
-                             name = str_replace_all(names(returndat)[7],'_',' '))
+                             name = str_replace_all(names(returndat)[7],'_',' '), 
+                             line = list(dash = 'dot'))
   fig5 <- fig5 %>% add_trace(y = ~unlist(round(returndat[[8]]$mean_protected_individuals[i],0)), 
-                             name = str_replace_all(names(returndat)[8],'_',' '))
+                             name = str_replace_all(names(returndat)[8],'_',' '), 
+                             line = list(dash = 'dash'))
   fig5 <- fig5 %>% add_trace(y = ~unlist(round(returndat[[9]]$mean_protected_individuals[i],0)), 
-                             name = str_replace_all(names(returndat)[9],'_',' '))
+                             name = str_replace_all(names(returndat)[9],'_',' '), 
+                             line = list(dash = 'dash'))
   fig5 <- fig5 %>% add_trace(y = ~unlist(round(returndat[[10]]$mean_protected_individuals[i],0)), 
                              name = str_replace_all(names(returndat)[10],'_',' '), 
                              line = list(dash = 'dash')) 
@@ -316,26 +315,4 @@ plotNoInd <- function(F1="0.05"){
 
 #########
 
-fmean_nprot <- function(fp=c(1:4)){
-  #fp = 1 # F= 0.05
-  #fp = 2 # F= 1
-  #fp = 3 # F= 0.2
-  #fp = 4 # F= 0.5
-  mean_nprot <- matrix(rep(NA,length(mean_nfull)),dim(mean_nfull)) #array(NA,c(dim(mean_nfull),length(fmortcols)))
-  mean_nprot_area <- mean_nprot
-  mean_dens <-mean_nprot
-  median_nprot <- mean_nprot
-  sd_nprot <- mean_nprot
-  logy <- 'y'
-  
-  for (s in 1:nspecies) {
-    mean_nprot[s,] <- returndat[[s]]$mean_protected_individuals[,fmortcols[fp]]
-    mean_nprot_area[s,] <- returndat[[s]]$mean_protected_individuals[,fmortcols[fp]]*MPAmult
-    mean_dens[s,] <- returndat[[s]]$mean_protected_individuals[,fmortcols[fp]]/(MPAsizes*100)
-    median_nprot[s,] <- returndat[[s]]$median_protected_individuals[,fmortcols[fp]]
-    sd_nprot[s,] <- returndat[[s]]$sd_protected_individuals[,fmortcols[fp]]
-  }
-  return(mean_nprot)
-}
- 
 
