@@ -3,21 +3,21 @@
 library(stringr)
 
 rm(list = ls()) # remove all parameters from workspace
-data.folder <- 'C:/Users/nkrueck/Documents/Github/ParksSA/Data/'
-setwd(data.folder)
+data.folder <- paste0(getwd(),'/Data/Movement_Profiles/') #'C:/Users/nkrueck/Documents/Github/ParksSA/Data/'
+#setwd(data.folder)
 resolution <- 100 # in m
-type <- 'Idealized' # 'Measured' or 'Idealized'
+type <- 'Measured' # 'Measured' or 'Idealized'
 
 # get data on movement distances
 if (resolution > 1){
-  probsi <- readRDS(paste0('IndividualMovementProbabilities_',type,'_',resolution,'m.RDS'))
-  probsm <- readRDS(paste0('MeanMovementProbabilities_',type,'_',resolution,'m.RDS'))
+  probsi <- readRDS(paste0(data.folder,'IndividualMovementProbabilities_',type,'_',resolution,'m.RDS'))
+  probsm <- readRDS(paste0(data.folder,'MeanMovementProbabilities_',type,'_',resolution,'m.RDS'))
 } else {
-  probsi <- readRDS(paste0('IndividualMovementProbabilities_',type,'.RDS'))
-  probsm <- readRDS(paste0('MeanMovementProbabilities_',type,'.RDS'))
+  probsi <- readRDS(paste0(data.folder,'IndividualMovementProbabilities_',type,'.RDS'))
+  probsm <- readRDS(paste0(data.folder,'MeanMovementProbabilities_',type,'.RDS'))
 }
   
-save.folder <- 'C:/Users/nkrueck/Documents/Github/SA_MPA_model/Figures/'
+save.folder <- paste0(getwd(),'/Dispersal_kernels/') #'C:/Users/nkrueck/Documents/Github/SA_MPA_model/Figures/'
 species.names <- names(probsm)
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@

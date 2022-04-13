@@ -1,12 +1,12 @@
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 # MPA size decision support model for SA case study by Nils Krueck, Jan 2022          @
 # Script to run version 1.00 (Nils Krueck), 20 Feb 2022                               @
-#   - version run_SA_MPA_sizer_v100_nils - adapted from the first generic run sript   @
+#   - version run_SA_MPA_sizer_v100_nils - adapted from the first generic run script  @
 #   - folders specific to Nils' computer                                              @
 #                                                                                     @
 # Version:                                                                            @
+# 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
 
 rm(list = ls()) # delete parameters in the workspace
 library(stringr)
@@ -16,15 +16,18 @@ library(doParallel)
 # Specify model and parameterisation
 modelid <- 100 # specify model version / id
 resolution <- 100 # modelling resolution in m
-rBRUVcatchment <- 200 # radius of BRUV catchment
+rBRUVcatchment <- 100 # radius of BRUV catchment
 dispersal.period <- 'Weekly' # specify dispersal period
-age <- "Max" # specify age threshold as either "Max" or "Maturity"
-case.study.region <- "SA" # specify region name in case location names are not specified or pooled
+age <- 'Maturity' # specify age threshold as either "Max" or "Maturity"
+case.study.region <- 'SA' # specify region name in case location names are not specified or pooled
 location.names <- case.study.region # set to 'NA' unless data is supposed to be pooled!!!!  
-MPAsizes <- c(0,1,seq(500,2000,500),seq(3000,5000,1000),seq(10000,30000,10000),50000,100000) # specify MPA sizes to be analysed (in m)
-fmort <- seq(0,0.5,.05)  # fishing mortality rate when fully exposed (discrete proportion per year) 
-nreplicates <- 1000 # number of replicate simulations to run
+MPAsizes <- c(0,seq(500,2000,500),seq(3000,5000,1000),seq(10000,30000,10000),50000,100000) # specify MPA sizes to be analysed (in m)
+fmort <- seq(0,1,0.05)  # fishing mortality rate when fully exposed (discrete proportion per year) 
+nreplicates <- 100 # number of replicate simulations to run
 mean.extent <- 1 # specify extent of modeling environment based on either mean (1) or max movement distances (0)  
+idealized.maxn <- 1 # use uniform maxn data (>0) to get idealized results from movement profiles
+
+if(idealized.maxn == 1){case.study.region <- paste0(case.study.region,'_idealized')}
 
 # Load model and data
 modelversion <- paste0("SA_MPAsizer",modelid)
@@ -48,10 +51,10 @@ age.data <- read.csv(paste0(datadir,'input_parameters_updated.csv')) # load age 
 scientific.names <- age.data$genus.species[match(species.names,age.data$common.name)] # get scientific names
 
 ### Optimize performance in R
-
 nCores<-detectCores() #On Klaas' & Nils' laptops this returns 8, but returns above 4 are diminishing as they are not true separate cores
 cl <- makePSOCKcluster(nCores)
 registerDoParallel(cl)
+
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 #### Run the model for single species at a time @
@@ -90,6 +93,9 @@ for (s in 1:nspecies) {
   # specify locations to be analysed (Pre-specified names means data are pooled across locations)
   if(is.na(location.names)){location.names <- unique(num.data$location)
   } else {num.data$location <- location.names}
+  
+  # add idealized number at each location
+  if(idealized.maxn > 0){num.data$maxn <- idealized.maxn}
   
   #rBRUVcatchment <- rBRUVcatchments[s] # could introduce an internal loop 
   

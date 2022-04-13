@@ -3,10 +3,10 @@
 library(stringr)
 
 rm(list = ls()) # remove all parameters from workspace
-data.folder <- 'C:/Users/nkrueck/Documents/Github/SA_MPA_model/Data'
-setwd(data.folder)
-resolution <- 10 # in m
-type <- 'Idealized' # 'Measured' or 'Idealized'
+data.folder <- paste0(getwd(),'/') #Data/')#'C:/Users/nkrueck/Documents/Github/SA_MPA_model/Data'
+#setwd(data.folder)
+resolution <- 100 # in m
+type <- 'Measured' # 'Measured' or 'Idealized'
 
 # get data on dispersal
 probsi <- readRDS(paste0('IndividualMovementProbabilities_',type,'.RDS'))

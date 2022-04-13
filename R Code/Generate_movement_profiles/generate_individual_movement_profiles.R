@@ -3,15 +3,15 @@
 library(stringr)
 
 rm(list = ls()) # remove all parameters from workspace
-function.folder <- 'C:/Users/nkrueck/Dropbox/Projects/MPA SA project with Flinders Uni/SA_MPA_model/new_scripts'
-setwd(function.folder)
-source('generate_conmats_func.R') # run function to get idealized movement profiles
+function.folder <- paste0(getwd(),'/R Code/Generate_movement_profiles') #'C:/Users/nkrueck/Dropbox/Projects/MPA SA project with Flinders Uni/SA_MPA_model/new_scripts'
+#setwd(function.folder)
+source(paste0(function.folder,'/generate_conmats_func.R')) # run function to get idealized movement profiles
 
 # get data on dispersal
-data.folder <- 'C:/Users/nkrueck/Documents/Github/SA_MPA_model/Data'
-setwd(data.folder)
+data.folder <- paste0(getwd(),'/Data') #'C:/Users/nkrueck/Documents/Github/SA_MPA_model/Data'
+#setwd(data.folder)
 dispersal.files <- list.files(data.folder,pattern='Dispersal_Timescales_*',all.files=FALSE)
-dispersal.files <- sort(dispersal.files[2:length(dispersal.files)])
+dispersal.files <- sort(dispersal.files) #[2:length(dispersal.files)])
 nspecies <- length(dispersal.files)
 species.names <- matrix()
 
@@ -29,7 +29,7 @@ eprobsi_species <- list() # individual movement probability profiles estimated f
 for (s in 1:nspecies){  
   
   # load data
-  sdata <- readRDS(dispersal.files[s])
+  sdata <- readRDS(paste0(data.folder,'/',dispersal.files[s]))
   nperiods <- length(sdata)
   species.name <- str_replace_all(str_to_title(unique(sdata[[1]]$species_common_name))," ","_")
   species.names[s] <- species.name[species.name != "Na"] # exclude NAs
@@ -86,7 +86,7 @@ for (s in 1:nspecies){
     }
   
     eprobs_period[[p]] <- data.frame(Probability_Occurrence = eprobs_probs,
-                             Distance_Metres = eprobs_distances)
+                              Distance_Metres = eprobs_distances)
   
     rm(probmats,eprobs_distances,eprobs_probs)
     
