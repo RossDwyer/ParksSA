@@ -1,0 +1,184 @@
+---
+title: "Report for SA"
+author: "Ross Dwyer"
+date: '2022-03-28'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r, echo=FALSE,results='hide', message=FALSE, warning=FALSE}
+# 1. Load the packages -----------
+library(rgdal)
+library(rgeos)
+library(sp)
+library(sf)
+library(rmapshaper)
+library(magrittr)
+library(ggplot2)
+library(plotly)
+library(rmapshaper)
+library(tmap)
+library(stringr)
+library(dplyr)
+library(matrixStats)
+```
+
+# MPA size decision support model for SA case study by Nils Krueck, Jan 2022  
+## Script to plot results from model v1.00 as an interactive figure by Ross Dwyer                             
+
+```{r, echo=FALSE}
+modelid <- 100 # specify model version / id
+maindir <- paste0("/Users/rdwyer2/Library/CloudStorage/OneDrive-UniversityoftheSunshineCoast/Australia/Flinders",'/')
+datadir <- paste0(maindir, 'ParksSA/Data/') ### RD modified this code line in 16 March 2022
+results.folder <- 'ParksSA/Results/'### RD modified this code line in 16 March 2022
+modelversion <- paste0("SA_MPAsizer",modelid)
+resultsdir <- paste0(maindir,results.folder,modelversion,'/')
+```
+
+```{r}
+case.study.region <- "SA_idealized"
+resolution <- 100
+dispersal.period <- "Weekly"
+age <- "Maturity"
+rBRUVcatchment <- 100
+```
+
+```{r, echo=FALSE}
+scenario.name <- paste0(case.study.region,'_Res', resolution,'_',dispersal.period,'_AgeAt',age,'_rBRUV',rBRUVcatchment)
+
+returndat <- readRDS(paste0(resultsdir,modelversion,'_',scenario.name,'_returndat.RDS'))
+
+nona.locs <- which(!is.na(returndat)&!is.null(returndat))
+returndat <- returndat[nona.locs]
+nspecies <- length(returndat)
+species.names <- names(returndat) 
+
+age.data <- read.csv(paste0(datadir,'input_parameters_updated.csv'))
+species.groups <- age.data$species.group[match(species.names,age.data$common.name)]
+species.order <- order(species.groups,species.names) #species.groups,species.names) # determine order of species to plot
+species.names.ordered <- species.names[species.order] # get names of species in order
+ngroups <- xtabs(~species.groups)
+
+returndat <- returndat[species.names.ordered]
+
+
+SpeciesNames <- str_replace_all(species.names.ordered,'_',' ') # Formatted species names
+
+
+```
+
+
+```{r}
+#Load the plotting functions
+source("~/Library/CloudStorage/OneDrive-UniversityoftheSunshineCoast/Australia/Flinders/R/Plotly MPA functions.R")
+```
+# Calculate MPA size to achieve certain protection levels 
+
+
+# Plot mean protection 
+
+
+```{r, echo=FALSE}
+fig11 <- plotPropTim()
+fig12 <- plotPropTim(sxaxis=10) # plots wih mps size limited to 10 km
+#fig13 <- plotPropTim(sxaxis=10,sd=TRUE) # plots wih mps size limited to 10 km
+
+fig <- subplot(fig11, fig12) %>% 
+  layout(title = 'Mean protection')
+fig
+
+```
+
+# Plot lifetime fishing mortality and fishing mortality offsets
+
+```{r}
+plotLifMort(F1="0.05",sd=TRUE)
+plotLifMort(F1="0.1")
+plotLifMort(F1="0.2")
+plotLifMort(F1="0.5")
+```
+
+
+# fishing mortality offsets 
+
+
+
+```{r}
+#foffs.d <- round(foffs,2) # Round to 2 decimal places for easy viewing
+plotMortOff(F1="0.05")
+plotMortOff(F1="0.1")
+plotMortOff(F1="0.2")
+plotMortOff(F1="0.5")
+```
+
+
+# Probability of survival 
+
+```{r}
+plotProbSurv(F1="0.05")
+plotProbSurv(F1="0.1")
+plotProbSurv(F1="0.2")
+plotProbSurv(F1="0.5")
+```
+
+# Plot number of protected individuals 
+
+```{r}
+plotNoInd("0.05")
+plotNoInd("0.1")
+plotNoInd("0.2")
+plotNoInd("0.5")
+```
+
+
+## Including Maps
+
+You can also embed plots, for example:
+
+```{r, echo=FALSE}
+# 8. Plotting the data 
+
+SAMPA_CatII_nearest_sf <- readRDS(file="/Users/rdwyer2/Library/CloudStorage/OneDrive-UniversityoftheSunshineCoast/Australia/Flinders/Data/SAMPA_CatII_nearest.RDS")
+
+tmap_mode("view")
+tm_shape(SAMPA_CatII_nearest_sf) + 
+  tm_fill("MaxDist_km", 
+          title="Maximum width of MPA (km)",
+          id="NAME", 
+          breaks = c(0,5,10,20,30,50,100,200),
+          palette = rev(sf.colors(7)),
+          popup.vars=c("Type"="TYPE",
+                       "RES_NUMBER"="RES_NUMBER",
+                       "Distance to nearest MPA (km)"="Nearest_km", 
+                       "Max width (km)"="MaxDist_km", 
+                       "Area"="GAZ_AREA"))
+
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+```{r, echo=FALSE}
+# 8. Plotting the data 
+
+tm_shape(SAMPA_CatII_nearest_sf) + 
+  tm_fill("Nearest_km", 
+          title="Minimum distance between MPAs (km)",
+          id="NAME", 
+          breaks = c(0,5,10,20,40,60,80),
+          palette = sf.colors(7),
+          popup.vars=c("Type"="TYPE",
+                       "RES_NUMBER"="RES_NUMBER",
+                       "Distance to nearest MPA (km)"="Nearest_km", 
+                       "Max width (km)"="MaxDist_km", 
+                       "Area"="GAZ_AREA"))
+
+```
