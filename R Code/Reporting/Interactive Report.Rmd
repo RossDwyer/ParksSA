@@ -1,7 +1,7 @@
 ---
-title: "Report for SA"
+title: "Interactive report for inspecting model outputs"
 author: "Ross Dwyer"
-date: '2022-03-28'
+date: '2022-04-13'
 output: html_document
 ---
 
@@ -9,11 +9,12 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
+## Introduction
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+This is an R Markdown document that visualises the conservation benefits of no take protected areas to 10 teleost and elasmobranch species based on individual movements and relative abundances. The MPA size decision support model was originally developed by Dr Nils Krueck (UTAS) and published here - <https://conbio.onlinelibrary.wiley.com/doi/10.1111/conl.12415>. Dr Ross Dwyer (USC) and Dr Nils Krueck then adapted this modelling framework to allow telemetry and BRUV datasets to be included as model inputs. The original paper was published here - <https://www.sciencedirect.com/science/article/pii/S0960982219316008?via%3Dihub>. 
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+In this report, we apply this modelling framework to 6 teleost, three shark and one ray species to investigate the conservation effectiveness of existing no take reserves in South Australia using the following metrics. Project is a collaboration with Prof Charlie Huveneers (Flinders) and South Australia Government's Department for Environment and Water.
+
 
 ```{r, echo=FALSE,results='hide', message=FALSE, warning=FALSE}
 # 1. Load the packages -----------
@@ -32,22 +33,24 @@ library(dplyr)
 library(matrixStats)
 ```
 
-# MPA size decision support model for SA case study by Nils Krueck, Jan 2022  
-## Script to plot results from model v1.00 as an interactive figure by Ross Dwyer                             
 
 ```{r, echo=FALSE}
+# Full address of the R Studio Project where data and R code are stored (needed for reproducing markdown report)
+maindir <- "/Users/rdwyer2/GitHub/ParksSA/" 
+```
+First we set the model parameters
+
+```{r, echo=FALSE}
+# Set file locations
 modelid <- 100 # specify model version / id
-#maindir <- paste0("/Users/rdwyer2/Library/CloudStorage/OneDrive-UniversityoftheSunshineCoast/Australia/Flinders",'/')
-maindir <- "/Users/rdwyer2/GitHub/ParksSA/"
-#datadir <- paste0(maindir, 'ParksSA/Data/') ### RD modified this code line in 16 March 2022
-datadir <- paste0(maindir, 'Data/') ### RD modified this code line in 16 March 2022
-#results.folder <- 'ParksSA/Results/'### RD modified this code line in 16 March 2022
-results.folder <- 'Results/'### RD modified this code line in 16 March 2022
-modelversion <- paste0("SA_MPAsizer",modelid)
-resultsdir <- paste0(maindir,results.folder,modelversion,'/')
+datadir <- paste0(maindir, 'Data/') 
+results.folder <- 'Results/'
+modelversion <- paste0("SA_MPAsizer",modelid) # What model version are we using?
+resultsdir <- paste0(maindir,results.folder,modelversion,'/') # Where the Results .RDS files are stored
 ```
 
 ```{r}
+# Set model parameters
 case.study.region <- "SA_idealized"
 resolution <- 100
 dispersal.period <- "Weekly"
@@ -64,6 +67,7 @@ nona.locs <- which(!is.na(returndat)&!is.null(returndat))
 returndat <- returndat[nona.locs]
 nspecies <- length(returndat)
 species.names <- names(returndat) 
+SpeciesNames <- str_replace_all(species.names,'_',' ') # Formatted species names
 
 age.data <- read.csv(paste0(datadir,'input_parameters_updated.csv'))
 species.groups <- age.data$species.group[match(species.names,age.data$common.name)]
@@ -73,87 +77,124 @@ ngroups <- xtabs(~species.groups)
 
 returndat <- returndat[species.names.ordered]
 
-
-SpeciesNames <- str_replace_all(species.names.ordered,'_',' ') # Formatted species names
-
+#SpeciesNames <- str_replace_all(species.names.ordered,'_',' ') # Formatted species names
 
 ```
-
-
-```{r}
-#Load the plotting functions
-#source("~/Library/CloudStorage/OneDrive-UniversityoftheSunshineCoast/Australia/Flinders/R/Plotly MPA functions.R")
-source(paste0(maindir,"R Code/Reporting/Plotly MPA functions.R"))
-```
-# Calculate MPA size to achieve certain protection levels 
-
-
-# Plot mean protection 
 
 
 ```{r, echo=FALSE}
-fig11 <- plotPropTim()
-fig12 <- plotPropTim(sxaxis=10) # plots wih mps size limited to 10 km
-#fig13 <- plotPropTim(sxaxis=10,sd=TRUE) # plots wih mps size limited to 10 km
+#Load the plotting functions
+source(paste0(maindir,"R Code/Reporting/Plotly MPA functions.R"))
+```
+# Calculate MPA size to achieve certain protection levels {.tabset}
 
-fig <- subplot(fig11, fig12) %>% 
-  layout(title = 'Mean protection')
-fig
-
+## MPAs extending <10 km
+```{r, echo=FALSE}
+plotPropTim(sxaxis=10,sd=TRUE) # Plot mean protection with x axis <10 km
 ```
 
-# Plot lifetime fishing mortality and fishing mortality offsets
+## MPAs extending <100 km
+```{r, echo=FALSE}
+plotPropTim(sd=TRUE) # Plot mean protection with x axis <100 km
+```
 
-```{r}
+# Calculate lifetime fishing mortality and fishing mortality offsets {.tabset}
+
+## F = 0.05
+```{r, echo=FALSE}
 plotLifMort(F1="0.05",sd=TRUE)
-plotLifMort(F1="0.1")
-plotLifMort(F1="0.2")
-plotLifMort(F1="0.5")
 ```
 
+## F = 0.1
+```{r, echo=FALSE}
+plotLifMort(F1="0.1",sd=TRUE)
+```
 
-# fishing mortality offsets 
+## F = 0.2
+```{r, echo=FALSE}
+plotLifMort(F1="0.2",sd=TRUE)
+```
 
+## F = 0.5
+```{r, echo=FALSE}
+plotLifMort(F1="0.5",sd=TRUE)
+```
 
+# Calculate annual fishing mortality offsets  {.tabset}
 
-```{r}
+## F = 0.05
+```{r, echo=FALSE}
 #foffs.d <- round(foffs,2) # Round to 2 decimal places for easy viewing
 plotMortOff(F1="0.05")
+```
+
+## F = 0.1
+```{r, echo=FALSE}
 plotMortOff(F1="0.1")
+```
+
+## F = 0.2
+```{r, echo=FALSE}
 plotMortOff(F1="0.2")
+```
+
+## F = 0.5
+```{r, echo=FALSE}
 plotMortOff(F1="0.5")
 ```
 
 
-# Probability of survival 
+# Calculate the probability of survival to maturity {.tabset}
 
+## F = 0.05
 ```{r}
 plotProbSurv(F1="0.05")
+```
+
+## F = 0.1
+```{r, echo=FALSE}
 plotProbSurv(F1="0.1")
+```
+
+## F = 0.2
+```{r, echo=FALSE}
 plotProbSurv(F1="0.2")
+```
+
+## F = 0.5
+```{r, echo=FALSE}
 plotProbSurv(F1="0.5")
 ```
 
-# Plot number of protected individuals 
+# Calculate number of protected individuals {.tabset}
 
+## F = 0.05
 ```{r}
 plotNoInd("0.05")
-plotNoInd("0.1")
-plotNoInd("0.2")
-plotNoInd("0.5")
+```
+
+## F = 0.1
+```{r, echo=FALSE}
+plotNoInd(F1="0.1")
+```
+
+## F = 0.2
+```{r, echo=FALSE}
+plotNoInd(F1="0.2")
+```
+
+## F = 0.5
+```{r, echo=FALSE}
+plotNoInd(F1="0.5")
 ```
 
 
-## Including Maps
+# Maping South Australia's protected areas {.tabset}
 
-You can also embed plots, for example:
+This Section displays an interactive map of IUCN Cat II reserves in South Australian Waters. The dataset was sourced from the Australian Government Collaborative Australian Protected Area Database (CAPAD 2020) <https://www.awe.gov.au/agriculture-land/land/nrs/science/capad>. Areas are coloured according to (a) maximum reserve width or (b) the minimum distance between Cat II reserves. 
 
+## Max width 
 ```{r, echo=FALSE}
-# 8. Plotting the data 
-
-# SAMPA_CatII_nearest_sf <- readRDS(file="/Users/rdwyer2/Library/CloudStorage/OneDrive-UniversityoftheSunshineCoast/Australia/Flinders/Data/SAMPA_CatII_nearest.RDS")
-
-
 SAMPA_CatII_nearest_sf <- readRDS(paste0(maindir,"R Code/Reporting/SAMPA_CatII_nearest.RDS"))
 
 tmap_mode("view")
@@ -171,11 +212,8 @@ tm_shape(SAMPA_CatII_nearest_sf) +
 
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
-
-```{r, echo=FALSE}
-# 8. Plotting the data 
-
+## Min distance
+```{r, echo=FALSE,message=FALSE, warning=FALSE}
 tm_shape(SAMPA_CatII_nearest_sf) + 
   tm_fill("Nearest_km", 
           title="Minimum distance between MPAs (km)",
