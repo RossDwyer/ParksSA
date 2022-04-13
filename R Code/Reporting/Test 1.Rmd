@@ -37,9 +37,12 @@ library(matrixStats)
 
 ```{r, echo=FALSE}
 modelid <- 100 # specify model version / id
-maindir <- paste0("/Users/rdwyer2/Library/CloudStorage/OneDrive-UniversityoftheSunshineCoast/Australia/Flinders",'/')
-datadir <- paste0(maindir, 'ParksSA/Data/') ### RD modified this code line in 16 March 2022
-results.folder <- 'ParksSA/Results/'### RD modified this code line in 16 March 2022
+#maindir <- paste0("/Users/rdwyer2/Library/CloudStorage/OneDrive-UniversityoftheSunshineCoast/Australia/Flinders",'/')
+maindir <- "/Users/rdwyer2/GitHub/ParksSA/"
+#datadir <- paste0(maindir, 'ParksSA/Data/') ### RD modified this code line in 16 March 2022
+datadir <- paste0(maindir, 'Data/') ### RD modified this code line in 16 March 2022
+#results.folder <- 'ParksSA/Results/'### RD modified this code line in 16 March 2022
+results.folder <- 'Results/'### RD modified this code line in 16 March 2022
 modelversion <- paste0("SA_MPAsizer",modelid)
 resultsdir <- paste0(maindir,results.folder,modelversion,'/')
 ```
@@ -79,7 +82,8 @@ SpeciesNames <- str_replace_all(species.names.ordered,'_',' ') # Formatted speci
 
 ```{r}
 #Load the plotting functions
-source("~/Library/CloudStorage/OneDrive-UniversityoftheSunshineCoast/Australia/Flinders/R/Plotly MPA functions.R")
+#source("~/Library/CloudStorage/OneDrive-UniversityoftheSunshineCoast/Australia/Flinders/R/Plotly MPA functions.R")
+source(paste0(maindir,"R Code/Reporting/Plotly MPA functions.R"))
 ```
 # Calculate MPA size to achieve certain protection levels 
 
@@ -147,7 +151,10 @@ You can also embed plots, for example:
 ```{r, echo=FALSE}
 # 8. Plotting the data 
 
-SAMPA_CatII_nearest_sf <- readRDS(file="/Users/rdwyer2/Library/CloudStorage/OneDrive-UniversityoftheSunshineCoast/Australia/Flinders/Data/SAMPA_CatII_nearest.RDS")
+# SAMPA_CatII_nearest_sf <- readRDS(file="/Users/rdwyer2/Library/CloudStorage/OneDrive-UniversityoftheSunshineCoast/Australia/Flinders/Data/SAMPA_CatII_nearest.RDS")
+
+
+SAMPA_CatII_nearest_sf <- readRDS(paste0(maindir,"R Code/Reporting/SAMPA_CatII_nearest.RDS"))
 
 tmap_mode("view")
 tm_shape(SAMPA_CatII_nearest_sf) + 
