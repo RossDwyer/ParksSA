@@ -156,7 +156,7 @@ plotMortOff(F1="0.5")
 # Calculate the probability of survival to maturity {.tabset}
 
 ## F = 0.05
-```{r}
+```{r, echo=FALSE}
 plotProbSurv(F1="0.05")
 ```
 
@@ -202,11 +202,14 @@ plotNoInd(F1="0.5")
 
 This section displays an interactive map of IUCN Cat II reserves in South Australian Waters. The dataset was sourced from the Australian Government Collaborative Australian Protected Area Database (CAPAD 2020) <https://www.awe.gov.au/agriculture-land/land/nrs/science/capad>. Areas are coloured according to (a) maximum reserve width or (b) the minimum distance between Cat II reserves. 
 
+```{r, echo=FALSE,results='hide', message=FALSE, warning=FALSE}
+tmap_mode("view")
+```
+
 ## Max width 
 ```{r, echo=FALSE}
 SAMPA_CatII_nearest_sf <- readRDS(paste0(maindir,"R Code/Reporting/SAMPA_CatII_nearest.RDS"))
 
-tmap_mode("view")
 tm_shape(SAMPA_CatII_nearest_sf) + 
   tm_fill("MaxDist_km", 
           title="Maximum width of MPA (km)",
