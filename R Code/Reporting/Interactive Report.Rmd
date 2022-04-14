@@ -11,11 +11,11 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Introduction
 
-This is an R Markdown document that visualises the conservation benefits of no take protected areas to 10 teleost and elasmobranch species based on individual movements and relative abundances. This project is a collaboration between Dr Ross Dwyer (USC), Dr Nils Krueck (UTAS) and Prof Charlie Huveneers (Flinders), with South Australia Government's Department for Environment and Water as Industry Partners.
+This is an R Markdown document that visualises the conservation benefits of no take protected areas to 10 teleost and elasmobranch species based on individual movements and relative abundances. This project is a collaboration between Dr Ross Dwyer (USC), Dr Nils Krueck (UTAS) and Prof Charlie Huveneers (Flinders), with the South Australian Government's Department for Environment and Water as Industry Partners.
 
 The MPA size decision support model was originally developed by Dr Nils Krueck (UTAS) and published here - <https://conbio.onlinelibrary.wiley.com/doi/10.1111/conl.12415>. Dr Ross Dwyer (USC) and Dr Nils Krueck adapted this modelling framework to allow telemetry and BRUV datasets to be included as model inputs. The original paper was published here - <https://www.sciencedirect.com/science/article/pii/S0960982219316008?via%3Dihub>. 
 
-Here, we apply this modelling framework to 6 teleost (Western Blue Groper, Bluethroat Wrasse, Harlequinn, Yellowtail Kingfish, Snapper, Silver Trevally), three shark((Bronze Whaler, Dusky Shark, White Shark)) and one ray species (Southern Eagle Ray) to investigate the conservation effectiveness of existing no take reserves in South Australia for these species. 
+Here, we apply this modelling framework to 6 teleost (Western Blue Groper, Bluethroat Wrasse, Harlequinn, Yellowtail Kingfish, Snapper, Silver Trevally), three shark (Bronze Whaler, Dusky Shark, White Shark) and one ray species (Southern Eagle Ray) to investigate the conservation effectiveness of existing no take reserves in South Australia for these species. 
 
 Effectiveness is measured by: 
 
