@@ -29,8 +29,8 @@ sp_files <- list(det = sp_det,
                  rmeta = sp_receivermet,
                  tmeta = sp_tagmet,
                  meas = sp_meas)
-qc.out <- runQC(sp_files) # Run remora::runQC() to combine fields 
-#saveRDS(qc.out, file = "Data/snapper_detQC.RDS") # Save to github
+#qc.out <- runQC(sp_files) # Run remora::runQC() to combine fields 
+saveRDS(qc.out, file = "Data/snapper_detQC.RDS") # Save to github
 
 ## Get the data ready for generating temporal dispersal metrics --------------
 
@@ -59,6 +59,8 @@ location_summary <-  d.dplyr %>%
                 receiver_deployment_longitude, 
                 receiver_deployment_latitude,
                 Day,Week,Month)
+
+length(unique(location_summary$transmitter_id)) ## 44 ids
 
 
 ### Days ------------
@@ -137,7 +139,19 @@ Dispersal_Timescales_Snapper <- list(Daily=dispersal_summary_day,
 saveRDS(Dispersal_Timescales_Snapper, file = "Data/Dispersal_Timescales_Snapper.RDS") # Save to github
 
 ##############################################
+#Check the data 
 
+Dispersal_Timescales_Snapper <- readRDS(file = "Data/Dispersal_Timescales_Snapper.RDS") # Save to github
+# dispersal_summary_week <- Dispersal_Timescales_Snapper[[2]]
+# 
+# length(unique(dispersal_summary_week$transmitter_id)) ## 44 ids 
+#       
+# rawdat <- unique(dispersal_summary_week$transmitter_id)
+# 
+# rawdat[is.na(match(rawdat,names(probsi_s[[2]])))]
+# 
+# dispersal_summary_week %>% filter(transmitter_id==128688849)
+# dispersal_summary_week %>% filter(transmitter_id==128688861)
 
 # Compute a histogram of distance per month
 disp.hist <- Dispersal_Timescales_Snapper$Monthly %>%
