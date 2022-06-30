@@ -31,6 +31,9 @@ foffplot <- c(1) # annual mortality offset/risk/survival plots (all the same so 
 
 idealized.maxn <- 1
 if(idealized.maxn == 1){case.study.region <- paste0(case.study.region,'_idealized')}
+mean.dist <- 1
+if(mean.dist == 1){case.study.region <- paste0(case.study.region,'_meanDist')}
+
 
 # plot specs
 lwd <- 2 # line width
@@ -91,7 +94,6 @@ for(g in 1:length(ngroups)){
   cols <- c(na.omit(cols),rep(ucols[g],ngroups[g]))} # specify colours
 #cols <- cols[species.order]
 #ltys <- ltys[species.order]
-
 
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@

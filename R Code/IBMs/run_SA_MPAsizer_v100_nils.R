@@ -4,7 +4,7 @@
 #   - version run_SA_MPA_sizer_v100_nils - adapted from the first generic run script  @
 #   - folders specific to Nils' computer                                              @
 #                                                                                     @
-# Version:                                                                            @
+# Version: nils02, adding code to include runs based on mean distance                                                                             @
 # 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
@@ -18,7 +18,7 @@ modelid <- 100 # specify model version / id
 resolution <- 100 # modelling resolution in m
 rBRUVcatchment <- 100 # radius of BRUV catchment
 dispersal.period <- 'Weekly' # specify dispersal period
-age <- 'Maturity' # specify age threshold as either "Max" or "Maturity"
+age <- 'Max' # specify age threshold as either "Max" or "Maturity"
 case.study.region <- 'SA' # specify region name in case location names are not specified or pooled
 location.names <- case.study.region # set to 'NA' unless data is supposed to be pooled!!!!  
 MPAsizes <- c(0,seq(500,2000,500),seq(3000,5000,1000),seq(10000,30000,10000),50000,100000) # specify MPA sizes to be analysed (in m)
@@ -26,8 +26,10 @@ fmort <- seq(0,1,0.05)  # fishing mortality rate when fully exposed (discrete pr
 nreplicates <- 100 # number of replicate simulations to run
 mean.extent <- 1 # specify extent of modeling environment based on either mean (1) or max movement distances (0)  
 idealized.maxn <- 1 # use uniform maxn data (>0) to get idealized results from movement profiles
+mean.dist <- 1 # use the grand mean across individual movement distances to 
 
 if(idealized.maxn == 1){case.study.region <- paste0(case.study.region,'_idealized')}
+if(mean.dist == 1){case.study.region <- paste0(case.study.region,'_meanDist')}
 
 # Load model and data
 modelversion <- paste0("SA_MPAsizer",modelid)
@@ -49,6 +51,7 @@ species.names <- names(mov.data.all) # get species names
 nspecies <- length(species.names)   # specify number of species
 age.data <- read.csv(paste0(datadir,'input_parameters_updated.csv')) # load age input data
 scientific.names <- age.data$genus.species[match(species.names,age.data$common.name)] # get scientific names
+mean.distances <- read.csv(paste0(datadir,'mean_distance_m_',tolower(dispersal.period),'.csv'))
 
 ### Optimize performance in R
 nCores<-detectCores() #On Klaas' & Nils' laptops this returns 8, but returns above 4 are diminishing as they are not true separate cores
@@ -96,6 +99,17 @@ for (s in 1:nspecies) {
   
   # add idealized number at each location
   if(idealized.maxn > 0){num.data$maxn <- idealized.maxn}
+  
+  # override data with mean distance profile if species
+  if(mean.dist == 1){
+    species.mean.dist.data.loc <- which(mean.distances$common.name==species.name)
+    mdata <- data.frame(Distance_Metres = seq(-ceiling(mean.distances$mean.dist[species.mean.dist.data.loc]/100)*100,
+                                    ceiling(mean.distances$mean.dist[species.mean.dist.data.loc]/100)*100,100))
+    mdata$Probability_Occurrence <- 1/dim(mdata)[1]
+    mov.data <- list()
+    mov.data[[1]] <- mdata
+    names(mov.data) <- "Mean_species_dist"
+  }
   
   #rBRUVcatchment <- rBRUVcatchments[s] # could introduce an internal loop 
   

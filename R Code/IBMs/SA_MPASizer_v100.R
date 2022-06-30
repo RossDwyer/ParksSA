@@ -14,7 +14,7 @@ SA_MPASizer_v100 <- function(species.name,   # name of species to simulate
                              rBRUVcatchment, # Radius in m of the plume catchment area around BRUVs (area of attraction)
                              fmort,          # fishing mortality rate(s) when fully exposed (discrete proportion per year)
                              max.age,        # maximum age of species
-                             nreplicates = 1000, # number of replicate simulations to run
+                             nreplicates, #= 1000, # number of replicate simulations to run
                              resolution = 100, # resolution of the modelling environment in m
                              mean.extent = 1) # specify extent of modeling environment based on either mean (1) or max movement distances (0)
 
