@@ -1,7 +1,7 @@
 ---
 title: "Interactive report for inspecting model outputs"
 author: "Ross G. Dwyer, Nils Krueck & Charlie Huveneers"
-date: '2022-04-14'
+date: '2022-06-30'
 output: html_document
 ---
 
@@ -20,8 +20,9 @@ Here, we apply this modelling framework to 6 teleost (Western Blue Groper, Bluet
 Effectiveness is measured by: 
 
 * estimated proportion of activity within an MPA
-* estimated lifetime fishing mortality under variable degrees of annual fishing morality
 * annual fishing mortality offsets considering variable degrees of fishing morality
+* estimated lifetime fishing mortality to age-at-maturity under variable degrees of annual fishing morality
+* estimated lifetime fishing mortality to longevity under variable degrees of annual fishing morality
 * the total number of individuals protected over their lifetime considering variable degrees of fishing morality
 
 
@@ -62,6 +63,7 @@ case.study.region <- "SA_idealized"
 resolution <- 100
 dispersal.period <- "Weekly"
 age <- "Maturity"
+age2 <- "Max"
 rBRUVcatchment <- 100
 ```
 
@@ -87,6 +89,30 @@ returndat <- returndat[species.names.ordered]
 
 SpeciesNames <- str_replace_all(species.names.ordered,'_',' ') # Formatted species names
 
+## This bit for the longevity plots
+
+scenario.name2 <- paste0(case.study.region,'_Res', resolution,'_',dispersal.period,'_AgeAt',age2,'_rBRUV',rBRUVcatchment)
+
+returndat2 <- readRDS(paste0(resultsdir,modelversion,'_',scenario.name2,'_returndat.RDS'))
+
+nona.locs <- which(!is.na(returndat2)&!is.null(returndat))
+returndat <- returndat[nona.locs]
+nspecies <- length(returndat2)
+species.names <- names(returndat2) 
+SpeciesNames <- str_replace_all(species.names,'_',' ') # Formatted species names
+
+age.data <- read.csv(paste0(datadir,'input_parameters_updated.csv'))
+species.groups <- age.data$species.group[match(species.names,age.data$common.name)]
+species.order <- order(species.groups,species.names) #species.groups,species.names) # determine order of species to plot
+species.names.ordered <- species.names[species.order] # get names of species in order
+ngroups <- xtabs(~species.groups)
+
+returndat2 <- returndat2[species.names.ordered]
+
+SpeciesNames <- str_replace_all(species.names.ordered,'_',' ') # Formatted
+
+
+
 ```
 
 
@@ -94,7 +120,9 @@ SpeciesNames <- str_replace_all(species.names.ordered,'_',' ') # Formatted speci
 #Load the plotting functions
 source(paste0(maindir,"R Code/Reporting/Plotly MPA functions.R"))
 ```
-# Calculate MPA size to achieve certain protection levels {.tabset}
+Next we calculate the MPA size needed to achieve certain protection levels across the five measures of conservation effectiveness. 
+
+# 1. Time spent in MPAs {.tabset}
 
 ## MPAs extending <10 km
 ```{r, echo=FALSE}
@@ -106,29 +134,7 @@ plotPropTim(sxaxis=10,sd=TRUE) # Plot mean protection with x axis <10 km
 plotPropTim(sd=TRUE) # Plot mean protection with x axis <100 km
 ```
 
-# Calculate lifetime fishing mortality and fishing mortality offsets {.tabset}
-
-## F = 0.05
-```{r, echo=FALSE}
-plotLifMort(F1="0.05",sd=TRUE)
-```
-
-## F = 0.1
-```{r, echo=FALSE}
-plotLifMort(F1="0.1",sd=TRUE)
-```
-
-## F = 0.2
-```{r, echo=FALSE}
-plotLifMort(F1="0.2",sd=TRUE)
-```
-
-## F = 0.5
-```{r, echo=FALSE}
-plotLifMort(F1="0.5",sd=TRUE)
-```
-
-# Calculate annual fishing mortality offsets  {.tabset}
+# 2. Annual fishing mortality offsets {.tabset}
 
 ## F = 0.05
 ```{r, echo=FALSE}
@@ -152,29 +158,53 @@ plotMortOff(F1="0.5")
 ```
 
 
-# Calculate the probability of survival to maturity {.tabset}
+# 3. Lifetime fishing mortality (up to age-at-maturity) {.tabset}
 
 ## F = 0.05
 ```{r, echo=FALSE}
-plotProbSurv(F1="0.05")
+plotLifMort(F1="0.05",sd=TRUE)
 ```
 
 ## F = 0.1
 ```{r, echo=FALSE}
-plotProbSurv(F1="0.1")
+plotLifMort(F1="0.1",sd=TRUE)
 ```
 
 ## F = 0.2
 ```{r, echo=FALSE}
-plotProbSurv(F1="0.2")
+plotLifMort(F1="0.2",sd=TRUE)
 ```
 
 ## F = 0.5
 ```{r, echo=FALSE}
-plotProbSurv(F1="0.5")
+plotLifMort(F1="0.5",sd=TRUE)
 ```
 
-# Calculate number of protected individuals {.tabset}
+# 4. Lifetime fishing mortality (to longevity) {.tabset}
+
+## F = 0.05
+```{r, echo=FALSE}
+plotLifMort_L(F1="0.05",sd=TRUE)
+```
+
+## F = 0.1
+```{r, echo=FALSE}
+plotLifMort_L(F1="0.1",sd=TRUE)
+```
+
+## F = 0.2
+```{r, echo=FALSE}
+plotLifMort_L(F1="0.2",sd=TRUE)
+```
+
+## F = 0.5
+```{r, echo=FALSE}
+plotLifMort_L(F1="0.5",sd=TRUE)
+```
+
+
+
+# 5. Number of protected individuals {.tabset}
 
 ## F = 0.05
 ```{r, echo=FALSE}

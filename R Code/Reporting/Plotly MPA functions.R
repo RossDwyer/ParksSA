@@ -100,6 +100,7 @@ plotPropTim <- function(sxaxis=100,sd=FALSE){
 # Plot lifetime fishing mortality and fishing mortality offsets #### ----
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
+# First to age of maturity
 plotLifMort <- function(F1="0.05",sd=FALSE){
   i = which(names(returndat[[1]]$mean_Fmortality)==F1)
   
@@ -170,7 +171,7 @@ plotLifMort <- function(F1="0.05",sd=FALSE){
   }
   # Limits the x axis to 100 km
   fig2 <- fig2 %>% 
-    layout( yaxis = list(title = 'Lifetime fishing mortality (%)',
+    layout( yaxis = list(title = 'Lifetime fishing mortality (%) to age-at-maturity',
                          range = list(0, 100)), 
             xaxis = list(title = 'MPA size (km)',
                          range = list(0, 100)),
@@ -178,6 +179,87 @@ plotLifMort <- function(F1="0.05",sd=FALSE){
     layout(hovermode = "x unified")
   return(fig2)
 }
+
+# Second to longevity
+plotLifMort_L <- function(F1="0.05",sd=FALSE){ 
+  i = which(names(returndat2[[1]]$mean_Fmortality)==F1)
+  
+  if(sd==FALSE){
+    fig2 <- plot_ly(x = returndat2[[1]]$mean_Fmortality$mpa_size/1000, 
+                    y = unlist(round(returndat2[[1]]$mean_Fmortality[i]* 100,2)),# Round to 2 decimal places for easy viewing
+                    name = str_replace_all(names(returndat2)[1],'_',' '),
+                    type = 'scatter', mode = 'lines+markers')
+    fig2 <- fig2 %>% add_trace(y = ~unlist(round(returndat2[[2]]$mean_Fmortality[i]* 100,2)), 
+                               name = str_replace_all(names(returndat2)[2],'_',' '))
+    fig2 <- fig2 %>% add_trace(y = ~unlist(round(returndat2[[3]]$mean_Fmortality[i]* 100,2)), 
+                               name = str_replace_all(names(returndat2)[3],'_',' ')) 
+    fig2 <- fig2 %>% add_trace(y = ~unlist(round(returndat2[[4]]$mean_Fmortality[i]* 100,2)), 
+                               name = str_replace_all(names(returndat2)[4],'_',' '))
+    fig2 <- fig2 %>% add_trace(y = ~unlist(round(returndat2[[5]]$mean_Fmortality[i]* 100,2)), 
+                               name = str_replace_all(names(returndat2)[5],'_',' '))
+    fig2 <- fig2 %>% add_trace(y = ~unlist(round(returndat2[[6]]$mean_Fmortality[i]* 100,2)), 
+                               name = str_replace_all(names(returndat2)[6],'_',' '))
+    fig2 <- fig2 %>% add_trace(y = ~unlist(round(returndat2[[7]]$mean_Fmortality[i]* 100,2)), 
+                               name = str_replace_all(names(returndat2)[7],'_',' '),
+                               line = list(dash = 'dot'))  
+    fig2 <- fig2 %>% add_trace(y = ~unlist(round(returndat2[[8]]$mean_Fmortality[i]* 100,2)), 
+                               name = str_replace_all(names(returndat2)[8],'_',' '),
+                               line = list(dash = 'dash')) 
+    fig2 <- fig2 %>% add_trace(y = ~unlist(round(returndat2[[9]]$mean_Fmortality[i]* 100,2)), 
+                               name = str_replace_all(names(returndat2)[9],'_',' '),
+                               line = list(dash = 'dash'))  
+    fig2 <- fig2 %>% add_trace(y = ~unlist(round(returndat2[[10]]$mean_Fmortality[i]* 100,2)), 
+                               name = str_replace_all(names(returndat2)[10],'_',' '),
+                               line = list(dash = 'dash')) 
+  }
+  if(sd==TRUE){
+    fig2 <- plot_ly(x = returndat2[[1]]$mean_Fmortality$mpa_size/1000, 
+                    y = unlist(round(returndat2[[1]]$mean_Fmortality[i]* 100,2)),# Round to 2 decimal places for easy viewing
+                    name = str_replace_all(names(returndat2)[1],'_',' '),
+                    type = 'scatter', mode = 'lines+markers',
+                    error_y =list(array=unlist(round(returndat2[[1]]$sd_Fmortality[i]* 100,2))))
+    fig2 <- fig2 %>% add_trace(y = ~unlist(round(returndat2[[2]]$mean_Fmortality[i]* 100,2)), 
+                               name = str_replace_all(names(returndat2)[2],'_',' '),
+                               error_y =list(array=unlist(round(returndat2[[2]]$sd_Fmortality[i]* 100,2)))) 
+    fig2 <- fig2 %>% add_trace(y = ~unlist(round(returndat2[[3]]$mean_Fmortality[i]* 100,2)), 
+                               error_y =list(array=unlist(round(returndat2[[3]]$sd_Fmortality[i]* 100,2)))) 
+    fig2 <- fig2 %>% add_trace(y = ~unlist(round(returndat2[[4]]$mean_Fmortality[i]* 100,2)), 
+                               name = str_replace_all(names(returndat2)[4],'_',' '),
+                               error_y =list(array=unlist(round(returndat2[[4]]$sd_Fmortality[i]* 100,2))))  
+    fig2 <- fig2 %>% add_trace(y = ~unlist(round(returndat2[[5]]$mean_Fmortality[i]* 100,2)), 
+                               name = str_replace_all(names(returndat2)[5],'_',' '),
+                               error_y =list(array=unlist(round(returndat2[[5]]$sd_Fmortality[i]* 100,2)))) 
+    fig2 <- fig2 %>% add_trace(y = ~unlist(round(returndat2[[6]]$mean_Fmortality[i]* 100,6)), 
+                               name = str_replace_all(names(returndat2)[6],'_',' '),
+                               error_y =list(array=unlist(round(returndat2[[6]]$sd_Fmortality[i]* 100,2)))) 
+    fig2 <- fig2 %>% add_trace(y = ~unlist(round(returndat2[[7]]$mean_Fmortality[i]* 100,7)), 
+                               name = str_replace_all(names(returndat2)[7],'_',' '),
+                               line = list(dash = 'dot'), 
+                               error_y =list(array=unlist(round(returndat2[[7]]$sd_Fmortality[i]* 100,2))))  
+    fig2 <- fig2 %>% add_trace(y = ~unlist(round(returndat2[[8]]$mean_Fmortality[i]* 100,8)), 
+                               name = str_replace_all(names(returndat2)[8],'_',' '),
+                               line = list(dash = 'dash'), 
+                               error_y =list(array=unlist(round(returndat2[[8]]$sd_Fmortality[i]* 100,2)))) 
+    fig2 <- fig2 %>% add_trace(y = ~unlist(round(returndat2[[9]]$mean_Fmortality[i]* 100,9)), 
+                               name = str_replace_all(names(returndat2)[9],'_',' '),
+                               line = list(dash = 'dash'), 
+                               error_y =list(array=unlist(round(returndat2[[9]]$sd_Fmortality[i]* 100,2)))) 
+    fig2 <- fig2 %>% add_trace(y = ~unlist(round(returndat2[[10]]$mean_Fmortality[i]* 100,10)), 
+                               name = str_replace_all(names(returndat2)[10],'_',' '),
+                               line = list(dash = 'dash'), 
+                               error_y =list(array=unlist(round(returndat2[[10]]$sd_Fmortality[i]* 100,2))))  
+  }
+  # Limits the x axis to 100 km
+  fig2 <- fig2 %>% 
+    layout( yaxis = list(title = 'Lifetime fishing mortality (%) to longevity',
+                         range = list(0, 100)), 
+            xaxis = list(title = 'MPA size (km)',
+                         range = list(0, 100)),
+            title= list(text = paste0('Age at ',age2,': ',as.numeric(F1) * 100, '% annual fishing mortality'))) %>%
+    layout(hovermode = "x unified")
+  return(fig2)
+}
+
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 # fishing mortality offsets @ ----
