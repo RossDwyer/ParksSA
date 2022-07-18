@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Introduction
 
-This DRAFT document presents the preliminary results of modelling work to assess the  conservation benefits of no take protected areas to 10 teleost and elasmobranch species based on individual movements and relative abundances. This project is a collaboration between Dr Ross Dwyer (USC), Dr Nils Krueck (UTAS) and Prof Charlie Huveneers (Flinders), with the South Australian Government's Department for Environment and Water as Industry Partners.
+This DRAFT document presents the preliminary results of modelling work to assess the conservation benefits of no-take marine protected areas (no-take MPAs) to 10 teleost and elasmobranch species based on individual movements and relative abundances. This project is a collaboration between Dr Ross Dwyer (USC), Dr Nils Krueck (UTAS) and Prof Charlie Huveneers (Flinders), with the South Australian Government's Department for Environment and Water as Industry Partners.
 
 The MPA size decision support model was originally developed by Dr Nils Krueck (UTAS) and published here - <https://conbio.onlinelibrary.wiley.com/doi/10.1111/conl.12415>. Dr Ross Dwyer (USC) and Dr Nils Krueck adapted this modelling framework to allow telemetry and BRUV datasets to be included as model inputs. The original paper was published here - <https://www.sciencedirect.com/science/article/pii/S0960982219316008?via%3Dihub>. 
 
@@ -19,10 +19,10 @@ Here, we apply this modelling framework to 6 teleost (Western Blue Groper, Bluet
 
 Effectiveness is measured by: 
 
-* estimated proportion of activity within an MPA
+* estimated proportion of activity within a no-take MPA
 * annual fishing mortality offsets considering variable degrees of fishing morality
-* estimated lifetime fishing mortality to age-at-maturity under variable degrees of annual fishing morality
 * estimated lifetime fishing mortality to longevity under variable degrees of annual fishing morality
+* estimated lifetime fishing mortality to age-at-maturity under variable degrees of annual fishing morality
 * the total number of individuals protected over their lifetime considering variable degrees of fishing morality
 
 
@@ -157,30 +157,7 @@ plotMortOff(F1="0.2")
 plotMortOff(F1="0.5")
 ```
 
-
-# 3. Lifetime fishing mortality (up to age-at-maturity) {.tabset}
-
-## F = 0.05
-```{r, echo=FALSE}
-plotLifMort(F1="0.05",sd=TRUE)
-```
-
-## F = 0.1
-```{r, echo=FALSE}
-plotLifMort(F1="0.1",sd=TRUE)
-```
-
-## F = 0.2
-```{r, echo=FALSE}
-plotLifMort(F1="0.2",sd=TRUE)
-```
-
-## F = 0.5
-```{r, echo=FALSE}
-plotLifMort(F1="0.5",sd=TRUE)
-```
-
-# 4. Lifetime fishing mortality (to longevity) {.tabset}
+# 3. Lifetime fishing mortality (to longevity) {.tabset}
 
 ## F = 0.05
 ```{r, echo=FALSE}
@@ -202,6 +179,27 @@ plotLifMort_L(F1="0.2",sd=TRUE)
 plotLifMort_L(F1="0.5",sd=TRUE)
 ```
 
+# 4. Lifetime fishing mortality (up to age-at-maturity) {.tabset}
+
+## F = 0.05
+```{r, echo=FALSE}
+plotLifMort(F1="0.05",sd=TRUE)
+```
+
+## F = 0.1
+```{r, echo=FALSE}
+plotLifMort(F1="0.1",sd=TRUE)
+```
+
+## F = 0.2
+```{r, echo=FALSE}
+plotLifMort(F1="0.2",sd=TRUE)
+```
+
+## F = 0.5
+```{r, echo=FALSE}
+plotLifMort(F1="0.5",sd=TRUE)
+```
 
 
 # 5. Number of protected individuals {.tabset}
@@ -233,21 +231,20 @@ This section displays an interactive map of IUCN Cat II reserves in South Austra
 
 ```{r, echo=FALSE,results='hide', message=FALSE, warning=FALSE}
 tmap_mode("view")
+SAMPA_CatII_nearest_sf <- readRDS(paste0(maindir,"R Code/Reporting/SAMPA_CatII_nearest.RDS"))
 ```
 
 ## Max width 
 ```{r, echo=FALSE}
-SAMPA_CatII_nearest_sf <- readRDS(paste0(maindir,"R Code/Reporting/SAMPA_CatII_nearest.RDS"))
-
 tm_shape(SAMPA_CatII_nearest_sf) + 
   tm_fill("MaxDist_km", 
-          title="Maximum width of MPA (km)",
+          title="Maximum width of no-take MPA (km)",
           id="NAME", 
           breaks = c(0,5,10,20,30,50,100,200),
           palette = rev(sf.colors(7)),
           popup.vars=c("Type"="TYPE",
                        "RES_NUMBER"="RES_NUMBER",
-                       "Distance to nearest MPA (km)"="Nearest_km", 
+                       "Distance to nearest no-take MPA (km)"="Nearest_km", 
                        "Max width (km)"="MaxDist_km", 
                        "Area"="GAZ_AREA"))
 
@@ -257,14 +254,81 @@ tm_shape(SAMPA_CatII_nearest_sf) +
 ```{r, echo=FALSE,message=FALSE, warning=FALSE}
 tm_shape(SAMPA_CatII_nearest_sf) + 
   tm_fill("Nearest_km", 
-          title="Minimum distance between MPAs (km)",
+          title="Minimum distance between no-take MPAs (km)",
           id="NAME", 
           breaks = c(0,5,10,20,40,60,80),
           palette = sf.colors(7),
           popup.vars=c("Type"="TYPE",
                        "RES_NUMBER"="RES_NUMBER",
-                       "Distance to nearest MPA (km)"="Nearest_km", 
+                       "Distance to nearest no-take MPA (km)"="Nearest_km", 
                        "Max width (km)"="MaxDist_km", 
                        "Area"="GAZ_AREA"))
 
+```
+
+# {.tabset}
+```{r, echo=FALSE,results='hide', message=FALSE, warning=FALSE}
+vline <- function(x = 30, color = "black") {
+  list(
+    type = "line",
+    y0 = 0,
+    y1 = 1,
+    yref = "paper",
+    x0 = x,
+    x1 = x,
+    line = list(color = color)
+  )
+}
+```
+
+## Max width 
+```{r, echo=FALSE,message=FALSE, warning=FALSE}
+MaxDist_km_mean <- round(mean(SAMPA_CatII_nearest_sf$MaxDist_km),1)
+MaxDist_km_median <- round(median(SAMPA_CatII_nearest_sf$MaxDist_km),1)
+
+p1 <- SAMPA_CatII_nearest_sf %>% 
+  st_drop_geometry() %>% 
+  plot_ly(x = ~MaxDist_km, type = "histogram",
+  xbins = list(size = 5)) %>% 
+  layout(title = 'Histogram of maximum width of SA no-take MPAs', 
+         plot_bgcolor = "#e5ecf6",
+         xaxis = list(title = 'Maximum width (km) of no-take MPA'), 
+         yaxis = list(title = 'Frequency'),
+         shapes = list(
+           vline(MaxDist_km_mean),
+           vline(MaxDist_km_median,color="orange"))) %>% 
+  add_text(showlegend = FALSE, 
+           x = c(MaxDist_km_mean+10,MaxDist_km_median+10), 
+           y = c(5,3),
+           text = c(paste0("mean = ",MaxDist_km_mean," km"),
+                    paste0("median = ",MaxDist_km_median," km")),
+           textfont = list(color = c('black','orange'), size = c(14,14)))
+         
+p1
+```
+
+## Min distance
+```{r, echo=FALSE,message=FALSE, warning=FALSE}
+Nearest_km_mean <- round(mean(SAMPA_CatII_nearest_sf$Nearest_km),1)
+Nearest_km_median <- round(median(SAMPA_CatII_nearest_sf$Nearest_km),1)
+
+p2 <- SAMPA_CatII_nearest_sf %>% 
+  st_drop_geometry() %>% 
+  plot_ly(x = ~Nearest_km, type = "histogram",
+  xbins = list(size = 5)) %>% 
+  layout(title = 'Histogram of minimum distance between SA no-take MPAs', 
+         plot_bgcolor = "#e5ecf6",
+         xaxis = list(title = 'Minimum distance (km) between no-take MPAs'), 
+         yaxis = list(title = 'Frequency'),
+         shapes = list(
+           vline(Nearest_km_mean),
+           vline(Nearest_km_median,color="orange"))) %>% 
+  add_text(showlegend = FALSE, 
+           x = c(Nearest_km_mean,Nearest_km_median), 
+           y = c(5,3),
+           text = c(paste0("mean = ",Nearest_km_mean," km"),
+                    paste0("median = ",Nearest_km_median," km")),
+           textfont = list(color = c('black','orange'), size = c(14,14)))
+         
+p2
 ```

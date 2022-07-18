@@ -90,7 +90,7 @@ plotPropTim <- function(sxaxis=100,sd=FALSE){
   # or limit the x axis to 10 km
   fig <- fig %>% 
     layout( yaxis = list(title = 'Proportion of time spent in MPA'), 
-            xaxis = list(title = 'MPA size (km)',
+            xaxis = list(title = 'No-take MPA size (km)',
                          range = list(0, sxaxis+1))) %>%
     layout(hovermode = "x unified")
   return(fig)
@@ -100,7 +100,7 @@ plotPropTim <- function(sxaxis=100,sd=FALSE){
 # Plot lifetime fishing mortality and fishing mortality offsets #### ----
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-# First to age of maturity
+## For age of maturity
 plotLifMort <- function(F1="0.05",sd=FALSE){
   i = which(names(returndat[[1]]$mean_Fmortality)==F1)
   
@@ -142,6 +142,7 @@ plotLifMort <- function(F1="0.05",sd=FALSE){
                                name = str_replace_all(names(returndat)[2],'_',' '),
                                error_y =list(array=unlist(round(returndat[[2]]$sd_Fmortality[i]* 100,2)))) 
     fig2 <- fig2 %>% add_trace(y = ~unlist(round(returndat[[3]]$mean_Fmortality[i]* 100,2)), 
+                               name = str_replace_all(names(returndat)[3],'_',' '),
                                error_y =list(array=unlist(round(returndat[[3]]$sd_Fmortality[i]* 100,2)))) 
     fig2 <- fig2 %>% add_trace(y = ~unlist(round(returndat[[4]]$mean_Fmortality[i]* 100,2)), 
                                name = str_replace_all(names(returndat)[4],'_',' '),
@@ -173,14 +174,14 @@ plotLifMort <- function(F1="0.05",sd=FALSE){
   fig2 <- fig2 %>% 
     layout( yaxis = list(title = 'Lifetime fishing mortality (%) to age-at-maturity',
                          range = list(0, 100)), 
-            xaxis = list(title = 'MPA size (km)',
+            xaxis = list(title = 'No-take MPA size (km)',
                          range = list(0, 100)),
             title= list(text = paste0('Age at ',age,': ',as.numeric(F1) * 100, '% annual fishing mortality'))) %>%
     layout(hovermode = "x unified")
   return(fig2)
 }
 
-# Second to longevity
+## For longevity
 plotLifMort_L <- function(F1="0.05",sd=FALSE){ 
   i = which(names(returndat2[[1]]$mean_Fmortality)==F1)
   
@@ -222,6 +223,7 @@ plotLifMort_L <- function(F1="0.05",sd=FALSE){
                                name = str_replace_all(names(returndat2)[2],'_',' '),
                                error_y =list(array=unlist(round(returndat2[[2]]$sd_Fmortality[i]* 100,2)))) 
     fig2 <- fig2 %>% add_trace(y = ~unlist(round(returndat2[[3]]$mean_Fmortality[i]* 100,2)), 
+                               name = str_replace_all(names(returndat2)[3],'_',' '),
                                error_y =list(array=unlist(round(returndat2[[3]]$sd_Fmortality[i]* 100,2)))) 
     fig2 <- fig2 %>% add_trace(y = ~unlist(round(returndat2[[4]]$mean_Fmortality[i]* 100,2)), 
                                name = str_replace_all(names(returndat2)[4],'_',' '),
@@ -253,7 +255,7 @@ plotLifMort_L <- function(F1="0.05",sd=FALSE){
   fig2 <- fig2 %>% 
     layout( yaxis = list(title = 'Lifetime fishing mortality (%) to longevity',
                          range = list(0, 100)), 
-            xaxis = list(title = 'MPA size (km)',
+            xaxis = list(title = 'No-take MPA size (km)',
                          range = list(0, 100)),
             title= list(text = paste0('Age at ',age2,': ',as.numeric(F1) * 100, '% annual fishing mortality'))) %>%
     layout(hovermode = "x unified")
@@ -299,7 +301,7 @@ plotMortOff <- function(F1="0.05"){
   fig3 <- fig3 %>% 
     layout( yaxis = list(title = 'Annual fishing mortality',
                          range = list(0, as.numeric(F1))), 
-            xaxis = list(title = 'MPA size (km)',
+            xaxis = list(title = 'No-take MPA size (km)',
                          range = list(0, 100)),
             title= list(text = paste0(as.numeric(F1) * 100, '% Annual fishing mortality'))) %>%
     layout(hovermode = "x unified")    
@@ -345,7 +347,7 @@ plotProbSurv <- function(F1="0.05"){
   fig4 <- fig4 %>% 
     layout( yaxis = list(title = 'Annual probability of survival',
                          range = list(0, 1)), 
-            xaxis = list(title = 'MPA size (km)',
+            xaxis = list(title = 'No-take MPA size (km)',
                          range = list(0, 100)),
             title= list(text = paste0(as.numeric(F1) * 100, '% Annual fishing mortality'))) %>%
     layout(hovermode = "x unified")    
@@ -390,7 +392,7 @@ plotNoInd <- function(F1="0.05"){
   fig5 = fig5 %>%  # Add formatiing of plot xy axis and hover text with full MPA dim range
     layout( title = paste0(as.numeric(F1)*100,"% annual fishing mortality"),
             yaxis = list(title = 'Number of protected individuals in MPA'), 
-            xaxis = list(title = 'MPA size (km)')) %>%
+            xaxis = list(title = 'No-take MPA size (km)')) %>%
     layout(hovermode = "x unified")
   return(fig5)
 }
