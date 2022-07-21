@@ -147,3 +147,32 @@ ggsave(plot=ddhist_sub,
 install.packages("ggthemes")
 theme_base(base_size = 16, base_family = "")
 
+## For Table 1, extract maximum distance
+ftable1 <- function(sdata){
+   #sdata = Dispersal_Timescales_BTWrasse$Weekly
+  
+  # Filter to remove 0km distances per week
+  sdata_sum <- sdata %>%
+    group_by(transmitter_id) %>% 
+    summarize(maxmaxdist=max(maxDistkm),
+              Count=n()) %>% 
+    summarize(meanmaxdist=round(mean(maxmaxdist),1),
+              sdmaxdist=round(sd(maxmaxdist),1),
+              weeklyest=round(sum(Count),1)) %>% data.frame()
+  
+  return(sdata_sum)
+}
+  
+# Run the function on all our species to generate the plots
+ftable1(sdata = Dispersal_Timescales_BTWrasse$Weekly)
+ftable1(sdata = Dispersal_Timescales_Harlequin$Weekly)
+ftable1(sdata = Dispersal_Timescales_Trevally$Weekly)
+ftable1(sdata = Dispersal_Timescales_Snapper$Weekly)
+ftable1(sdata = Dispersal_Timescales_BlueGroper$Weekly)
+ftable1(sdata = Dispersal_Timescales_Kingfish$Weekly)
+ftable1(sdata = Dispersal_Timescales_EagleRay$Weekly)
+ftable1(sdata = Dispersal_Timescales_BronzeWhaler$Weekly)
+ftable1(sdata = Dispersal_Timescales_DuskyWhaler$Weekly)
+ftable1(sdata = Dispersal_Timescales_WhiteShark$Weekly)
+
+
