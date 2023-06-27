@@ -93,13 +93,15 @@ plotMovehistogram <- function(sdata,species.to.plot,icol){
   hist(sdata$maxDistkm,
        col = alpha(icol,alpha.col),
        border=alpha(icol,alpha.col),
+       breaks = seq(0, max(sdata$maxDistkm), length.out = 11),
        freq = FALSE, # FALSE = Relative freq, TRUE = actual
        ylab = '',
        xlab='',
        main ='',
        yaxt="n",
        cex.main=1, 
-       cex.sub=1)
+       cex.sub=1,
+       xlim=c(0,round(max(sdata$maxDistkm))))
   axis(side = 2,las = 2) ## Rotate the y labels
   title(main=paste0(str_replace_all(species.to.plot,"_"," ")," = ",SampleSize),adj = 0,font.main = 1) # adds the title
   
